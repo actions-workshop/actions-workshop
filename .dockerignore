@@ -1,0 +1,6 @@
+.devcontainer
+.vscode
+coverage
+dist
+node_modules
+#test

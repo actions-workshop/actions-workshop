@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  dev:
+    image: ghcr.io/octodemo/container-nodejs-development:base-20220501
+    command: sleep infinity
+    network_mode: host
+
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+
+      - type: bind
+        source: /usr/bin/docker
+        target: /usr/bin/docker
+
+      - type: bind
+        source: /usr/local/bin/docker-compose
+        target: /usr/local/bin/docker-compose

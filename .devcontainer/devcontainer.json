@@ -1,0 +1,37 @@
+{
+  "dockerComposeFile": [
+    "docker-compose.yml"
+  ],
+  "service": "dev",
+  "forwardPorts": [
+    4000
+  ],
+  "portsAttributes": {
+    "2222": {
+      "label": "SSH",
+      "onAutoForward": "silent"
+    },
+    "4000": {
+      "label": "Application",
+      "onAutoForward": "notify"
+    }
+  },
+  "extensions": [
+    "antfu.vite",
+    "github.github-vscode-theme",
+    "coenraads.bracket-pair-colorizer",
+    "dbaeumer.vscode-eslint",
+    "ms-azuretools.vscode-bicep"
+  ],
+  "settings": {
+    "terminal.integrated.profiles.linux": {
+      "bash": {
+        "path": "bash",
+        "icon": "terminal-bash"
+      }
+    },
+    "telemetry.enableTelemetry": false,
+    "extensions.ignoreRecommendations": true,
+  },
+  "postCreateCommand": "curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash && npm ci"
+}
