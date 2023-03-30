@@ -66,6 +66,9 @@ npm run dev
 | Run Unit Tests with [vitest](https://vitest.dev/)         | `npm run test`  |
 | Lint the Code with [ESLint](https://eslint.org/)          | `npm run lint`  |
 
+## Contributions
+
+Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for details.
 
 ## Licensing
 
