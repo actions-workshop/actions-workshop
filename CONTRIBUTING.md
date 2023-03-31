@@ -16,7 +16,7 @@ However, if you have ideas on how to improve the Workshop, feel free to [open an
 
 If you'd like to contribute to the codebase by fixing a bug or improving it in any other way, please read the following section.
 
-Contributions to this project are [released](https://help.github.com/articles/github-terms-of-service/#6-contributions-under-repository-license) to the public under the [MIT (for Code) and CC BY-SA 4.0 (Workshop Documentation under ./doc)](LICENSE.md).
+Contributions to this project are [released](https://help.github.com/articles/github-terms-of-service/#6-contributions-under-repository-license) to the public under the [MIT (for Code) and CC BY-SA 4.0 (Workshop Documentation under ./doc)](LICENSE).
 
 Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
 
