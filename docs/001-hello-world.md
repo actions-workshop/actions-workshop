@@ -98,7 +98,7 @@ Let's just go ahead and use the most basic and yet common one to get an understa
         run: echo "Hello World!" 
       # LS will simply list all files in the current directory to compare before and after
       - run: ls -l
-      - use: actions/checkout@v2
+      - uses: actions/checkout@v2
       - run: ls -l
     ```
 
