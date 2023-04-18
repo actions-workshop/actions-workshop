@@ -256,7 +256,7 @@ After the Code scanning workflow has finished, navigate into the pull request an
 
    ```tsx
     if (u.startsWith("javascript:") || u.startsWith("data:") || u.startsWith("vbscript:")) {
-      return: "about:blank";
+      return "about:blank";
     }
    ```
 
