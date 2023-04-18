@@ -51,6 +51,7 @@ We can make use of this data with the [Dependency Review Action](https://github.
 
     permissions:
       contents: read
+      pull-requests: write
 
     jobs:
       dependency-review:
@@ -60,6 +61,8 @@ We can make use of this data with the [Dependency Review Action](https://github.
             uses: actions/checkout@v3
           - name: 'Dependency Review'
             uses: actions/dependency-review-action@v3
+            with:
+              comment-summary-in-pr: true
     ```
 
 2. Commit this file to your `main` Branch
@@ -92,13 +95,16 @@ Now lets test if this actually works. We need to install a new dependency, so yo
 5. Open a pull-request for your branch<br/>
     *If you don't know how to open a pull request, you can pick your favorite way and follow allong with our [docs on Creating a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request?tool=cli)*
 
-6. By opening a pull-request, you will trigger the `Dependency Review` workflow - but it will fail due to the newly introduced vulnerability. You can see the details on why it failed by clicking on the **Details** link next to the failed check and then navigate to the workflows summary:
+6. By opening a pull-request, you will trigger the `Dependency Review` workflow - but it will fail due to the newly introduced vulnerability. As we have set the `comment-summary-in-pr` option to `true`, the action will conveniently comment on the pull-request with a summary of the vulnerabilities it found:
+    ![Screenshot of the pull request comment with the vulnerability summary](images/004/dependency_review_pr_comment.png)
+  
+    Alternatively, you can also view the summary in the workflow-run's dashboard by clicking on the **Details** link next to the failed check and then navigate to the workflows **Summary**:
 
     ![Screenshot of the failed Dependency Review check](images/004/failed_dependency_review.png)
 
     ![Screenshot of the dependency review summary](images/004/dependency_review_summary.png)
 
-Inspect the Links in the markdown - they will take you directly to the advisory on GitHub, where you can find more information about the vulnerability and how to fix it.
+Inspect the Links in the summary - they will take you directly to the advisory on GitHub, where you can find more information about the vulnerability and how to fix it.
 
 **You can try to fix the vulnerability by upgrading to the patched version of lodash. However, this is not required to continue with the workshop, so you can also just leave the pull request as it is as a reference for you!**
 
