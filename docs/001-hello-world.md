@@ -18,13 +18,13 @@ You can read more about [GitHub Actions and workflows components](https://docs.g
 
 ### 1.1 - Create a "Hello World" workflow
 
-Enough talking. Let's create our very first, own GitHub Actions workflow!
+Enough talking. Let's create our very first GitHub Actions workflow!
 
-1. In your repository, click on the **Actions** tab. You will be offered a list of workflow suggestions. For your first workflow, however, you need to click the **set up a workflow yourself** link at the top of the page
+1. In your repository, click on the **Actions** tab. You will be offered a list of workflow suggestions. For your first workflow, however, you need to click the **set up a workflow yourself** link at the top of the page.
 
   ![Screenshot depicting the initial actions tab](./images/001/setup_new_workflow.png)
 
-2. This will automatically bring you to GitHub Web GUI Action Editor, which wants to create a new file in your repository under `.github/workflows/main.yml`. Paste the following content into it:
+2. This will automatically bring you to the GitHub Web GUI Action Editor, which prompts you to create a new file in your repository under `.github/workflows/main.yml`. Paste the following content into it:
 
     ```yml
     name: Hello World Training Workflow
@@ -42,11 +42,11 @@ Enough talking. Let's create our very first, own GitHub Actions workflow!
 
     ![Screenshot showing the Web GUI Editor, highlighting the Commit changes button](images/001/web_gui_editor.png)
 
-3. Click on `Commit changes` and then commit it directly to the `main` branch (we won't tell anyone 🤫)
+3. Click on `Commit changes` and then commit it directly to the `main` branch (we won't tell anyone 🤫).
 
     ![Screenshot showing the commit dialog](images/001/commit_changes.png)
 
-Rename the file to `hello.yml`, click **Start Commit** and commit it directly to the `main` branch .
+Rename the file to `hello.yml`, click **Start Commit** and commit it directly to the `main` branch.
 
 ### 1.2 - Run the workflow manually
 
@@ -58,8 +58,7 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 ```
-
-You can manually execute your workflow by going to the **Actions** tab, then selecting your workflow and clicking on the **Run workflow** button:
+You can manually execute your workflow by navigating to the **Actions** tab, selecting your desired workflow, and clicking on the **Run workflow** button:
 
 <img width="1287" alt="image" src="https://user-images.githubusercontent.com/3329307/171651016-83f44a1c-471d-4b55-a71c-52b629f1bd5a.png">
 
@@ -67,58 +66,58 @@ Refresh the page or wait a few seconds to see the results of your workflow run.
 
 <img width="1262" alt="image" src="https://user-images.githubusercontent.com/3329307/171655904-27e82818-8e23-4462-a024-6d443ee8241d.png">
 
-Congratulations, you've just run your first GitHub Action worklfow. 🥳
+Congratulations, you have just run your first GitHub Actions workflow. 🥳
 
 > **About workflow triggers**
 >
-> Your workflows are only triggered by the events you specify. For more information, see "[Configuring a workflow](https://docs.github.com/en/actions/using-workflows)" and "[Workflow syntax for GitHub Actions](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions)". We will learn more about this in a bit.
+> Your workflows are only triggered by the events you specify. For more information, see "[Configuring a workflow](https://docs.github.com/en/actions/using-workflows)" and "[Workflow syntax for GitHub Actions](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions)". We will learn more about this shortly.
 
 ## 1.3 - Analyze your workflow
 
-In the list of workflow runs, click on one of the runs for the "Hello World" workflow. You will be shown its single job (`greet`) under "Jobs" on the left side the page. Click on that job to see its logs (you can expand the logs for a certain step by clicking on it).
+In the list of workflow runs, click on one of the runs for the "Hello World" workflow. You will be shown its single job (`greet`) under "Jobs" on the left side of the page. Click on that job to view its logs (you can expand the logs for a particular step by clicking on it).
 
-The workflow run view also allows you to re-run jobs in case problems occurred (button on the top right). Re-running a job also allows [enabling debug logging](https://docs.github.com/en/actions/monitoring-and-troubleshooting-workflows/enabling-debug-logging).
+The workflow run view also allows you to re-run jobs in case problems occurred (button on the top right). Additionally, re-running a job allows you to enable [debug logging](https://docs.github.com/en/actions/monitoring-and-troubleshooting-workflows/enabling-debug-logging).
 
-## 2 - Use an Action
+## 2 - Use an action
 
-Using bash commands to automate things is a basic requirement for any CI/CD System. However, writing shell scripts becomes very cumbersome if you want to scale up, and you tend to rewrite the same functionality in different projects over and over again.
+Using bash commands to automate processes is a fundamental requirement for any CI/CD system. However, writing shell scripts can become very cumbersome as you scale, and you might find yourself rewriting the same functionality across different projects.
 
-Luckily, with GitHub Actions there is a far better way of doing things: Using **Actions**! An **Action** is a small, composable and reusable unit of automation-code that can be easily used in all of your workflows.
+Fortunately, GitHub Actions offers a much better way to handle automation: by using **actions**! An **action** is a small, composable, and reusable unit of automation code that can be easily integrated into all of your workflows.
 
-### 2.1 - Add an Action to your workflow
+### 2.1 - Add an action to your workflow
 
-Let's just go ahead and use the most basic and yet common one to get an understanding: The `actions/checkout` action:
+Let's start by using one of the most basic yet commonly used actions to gain an understanding: The `actions/checkout` action:
 
-1. In your Editor, navigate to the `Code` Tab, then to `.github/workflows/hello.yml` and then hit the little pencil on the top right to reopen the actions editor.
+1. In your editor, navigate to the `Code` tab, then to `.github/workflows/hello.yml`, and then click the little pencil icon in the top right corner to reopen the actions editor.
 2. Add the following steps to the existing job:
 
     ```yml
     steps:
       - name: Greet the User
-        run: echo "Hello World!" 
-      # LS will simply list all files in the current directory to compare before and after
+        run: echo "Hello World!"
+      # List all files in the current directory for comparison before and after actions/checkout@v2.
       - run: ls -l
       - uses: actions/checkout@v2
       - run: ls -l
     ```
 
-    Note that, other than when running shell, running an action requires the usage of the `use` keyword.
+    Note that, unlike running shell commands, running an action requires the use of the `uses` keyword.
 
-3. Commit the changes, trigger a new workflow run
+3. Commit the changes and trigger a new workflow run.
 
 ### 2.2 - Understand the power of Actions
 
-If you check the workflow-logs and compare the output of the two `ls -l` commands, you will see that the `actions/checkout` Action has checked out the `main` branch of our repository onto the runner. And it did so without you having to specify any `git clone` shell command or any references or configuration.
+If you examine the workflow logs and compare the output of the two `ls -l` commands, you will notice that the `actions/checkout` Action has checked out the `main` branch of our repository onto the runner. And it accomplished this without requiring you to specify any `git clone` shell command or any references or configurations.
 
-And this is only the beginning. There are thousand of even more sophisticated actions ready for you to use that will make very complex automations a matter of a few lines of configuration. And we will see a lot of this over the course of this workshop.
+This is just the tip of the iceberg. There are thousands of even more sophisticated actions available for you to use, which can turn complex automations into a matter of a few lines of configuration. We will explore many of these throughout this workshop.
 
-But if you already want to take a glimpse on all the existing Actions created not only by GitHub, but the entire OSS Community, head over to our [GitHub Marketplace](https://github.com/marketplace?category=&query=&type=actions&verification=).
+If you’re eager to explore all the existing Actions created not only by GitHub but by the entire open-source community, head over to the [GitHub Marketplace](https://github.com/marketplace?category=&query=&type=actions&verification=).
 
 ## 3 - Use Environment variables and context
 
-You can use environment variables to add information that you would like to reference in your workflows. Some environment variable are even predefined for you to be ready to use (e.g. the person who triggered the current workflow run). To achieve that, edit the "Hello World" workflow and add the following lines:
+You can use environment variables to add information that you would like to reference in your workflows. Some environment variables are even predefined for you to use immediately (e.g., the person who triggered the current workflow run). To make use of these, edit the "Hello World" workflow and add the following lines:
 
-1. Add an environment variable at the job level
+1. Add an environment variable at the job level:
 
     ```yml
         greet:
@@ -126,7 +125,7 @@ You can use environment variables to add information that you would like to refe
                 MY_ENV: "John Doe"
     ```
 
-2. Add a second step to use your environment variable and a default one
+2. Add a second step to utilize your environment variable and a default one:
 
     ```yml
           - name: Run a multi-line script
@@ -136,7 +135,7 @@ You can use environment variables to add information that you would like to refe
     ```
 
 <details>
-<summary>You workflow file (main.yml) should now look like this:</summary>
+<summary>Your workflow file (main.yml) should now look like this:</summary>
 
 ```yml
 name: Hello World Training Workflow
@@ -147,7 +146,7 @@ on:
 jobs:
   greet:
     env:
-        MY_ENV: "John Doe"
+      MY_ENV: "John Doe"
     runs-on: ubuntu-latest
     steps:
       - name: Greet the User
@@ -160,19 +159,19 @@ jobs:
 
 </details>
 
-Commit your changes and start a new run. You should see the following in the run logs (whereas the second `Hello` should be printing your own GitHub username):
+Commit your changes and start a new run. You should see the following in the run logs (note that the second `Hello` should print your own GitHub username):
 
-![Screenshot showing the logs of the step created above, showcasing that it printed the specified environment-variable for $MY_ENV and the github-actor](https://user-images.githubusercontent.com/3329307/171652241-7b2f2eba-f5eb-4f3f-b529-dbf2198c65f7.png)
+![Screenshot showing the logs of the step created above, showcasing that it printed the specified environment variable for $MY_ENV and the github-actor](https://user-images.githubusercontent.com/3329307/171652241-7b2f2eba-f5eb-4f3f-b529-dbf2198c65f7.png)
 
-To learn more about environment variables and default variables, see [the official GitHub Documentation on Environment-Variables](https://docs.github.com/en/actions/learn-github-actions/environment-variables).
+To learn more about environment variables and default variables, see [the official GitHub documentation on Environment variables](https://docs.github.com/en/actions/learn-github-actions/environment-variables).
 
-## 4 - Make more events trigger your workflow
+## 4 - Make additional events trigger your workflow
 
 GitHub Actions workflows can be triggered by many different types of events:
 
 - [Events that trigger workflows](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows)
 
-Let's change our workflow to make it also run automatically whenever an issue is created in our repository (this is commonly called "IssueOps"). For that, add the following in the `on` section of the workflow file and commit the changes:
+Let's modify our workflow so that it also runs automatically whenever an issue is created in our repository. This practice is commonly referred to as "IssueOps". To achieve this, add the following to the `on` section of the workflow file and commit the changes:
 
 ```yml
 ...
@@ -185,7 +184,7 @@ on:
 ...
 ```
 
-Now create an issue in your repository and check the Actions tab. You should see the following workflow run:
+Now create an issue in your repository and check the Actions tab. You should see the workflow run as follows:
 
 ![image](https://user-images.githubusercontent.com/3329307/171652425-14a1ce9f-06c0-4b24-b937-7330c76c735f.png)
 
@@ -194,14 +193,14 @@ Now create an issue in your repository and check the Actions tab. You should see
 In this first part of the Actions workshop, you have learned how to:
 
 - 👏 Create a new Actions workflow for automation.
-- 👏 Analyze your workflow runs and get insights into what happened.
-- 👏 Used our first reusable Action.
-- 👏 Run automation on different events - manual trigger and issue.
+- 👏 Analyze your workflow runs and gain insights into what happened.
+- 👏 Use your first reusable Action.
+- 👏 Run automation on different events, including manual triggers and issues.
 
-Let's now use GitHub Actions to create a CI/CD workflow for our application.
+Now let's use GitHub Actions to create a CI/CD workflow for our application.
 
 ---
 
-Next :
+Next:
 
 - **[Basics of Continuous Integration with Actions](002-basics-of-ci-with-actions.md)**
