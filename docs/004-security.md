@@ -69,7 +69,7 @@ We can make use of this data with the [Dependency Review Action](https://github.
 
 ### 1.2 - Make sure it works
 
-Now lets test if this actually works. We need to install a new dependency, so you will have to do the following actions in a checked-out repository on your local machine or from within a GitHub Codespace:
+Now lets test if this actually works. We need to install a new dependency, so you will have to do the following actions in a **checked-out repository on your local machine or from within a GitHub Codespace**:
 
 1. Open up a Terminal
 2. Create a new branch `add-vulnerability`
@@ -229,15 +229,65 @@ jobs:
 
 By committing and opening the pull-request, you should have triggered the CodeQL workflow run. It will run for a bit, so you can go into the action logs and observe what is is doing.
 
-### 2.2 - Check the code scanning results
+### 2.2 Add a vulnerability
+
+Luckily, we don't seem to have a vulnerability just yet in our code. 😮‍💨
+Let's change that to see how CodeQL works and notifies us in a pull-request before it's too late.
+
+Conduct the following actions in a **checked-out repository on your local machine or from within a GitHub Codespace**:
+
+1. Open a Terminal and checkout the `add-codeql` branch we have just created:
+
+    ```bash
+    git fetch --all
+    git checkout add-codeql
+    ```
+
+2. Navigate to the file [`src/components/OctoLink.tsx`](../src/components/OctoLink.tsx) and look at the function `sanitizeUrl` on Line 10:
+
+    ```tsx
+    function sanitizeUrl(url: string) {
+      // UNCOMMENT THE FOLLOWING LINES TO INTRODUCE A SECURITY VULNERABILITY FOR STEP 04: SECURITY
+      // const u = decodeURI(url).trim().toLowerCase();
+      // if (u.startsWith("javascript:")) {
+      //   return "about:blank";
+      // }
+      return url;
+    }
+    ```
+
+3. There is some outcommented code which is, in fact, insecure. Just what we wanted - go ahead and remove the comments (by removing the `//`-characters in front):
+
+    ```tsx
+    function sanitizeUrl(url: string) {
+      // UNCOMMENT THE FOLLOWING LINES TO INTRODUCE A SECURITY VULNERABILITY FOR STEP 04: SECURITY
+      const u = decodeURI(url).trim().toLowerCase();
+      if (u.startsWith("javascript:")) {
+        return "about:blank";
+      }
+      return url;
+    }
+    ```
+
+4. Commit your changes back to the branch by typing the following commands into your terminal:
+
+   ```bash
+   git add .
+   git commit -m "Adds security vulnerabilyt"
+   git push
+   ```
+
+This will trigger the Code scanning workflow in our pull request again.
+
+### 2.3 - Check the code scanning results
 
 After the Code scanning workflow has finished, navigate into the pull request and inspect the results.
 
-1. Oh no :scream: - it actually found a vulnerability! Let's quickly click on *Details* to find out more.
+1. As expected, it now found the vulnerability we have just introduced. Let's quickly click on *Details* to find out more.
 
     ![Screenshot of some status checks of a GitHub pull request with a failed Code scanning job](images/004/failed_codeql_run.png)
 
-2. This will bring us to the **Checks** tab of the pull-request - it seems like we have a **Incomplete URL schema check** vulnerability with a **High** Severity. Let's click on *Details* again to find out more.
+2. This will bring us to the **Checks** tab of the pull-request, telling us we have a **Incomplete URL schema check** vulnerability with a **High** Severity. Let's click on *Details* again to find out more.
 
     ![Screenshot of a code scanning job summary page](images/004/codeql_workflow_summary.png)
 
