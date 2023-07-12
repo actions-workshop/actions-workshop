@@ -229,14 +229,14 @@ jobs:
 
 By committing and opening the pull-request, you should have triggered the CodeQL workflow run. It will run for a bit, so you can go into the action logs and observe what is is doing.
 
-### 2.2
+### 2.2 Add a vulnerability
 
-Luckily, we don't seem to have a security vulnerability just yet in our code. 😮‍💨
-Let's change that to see how CodeQL works and notifies you before it's too late.
+Luckily, we don't seem to have a vulnerability just yet in our code. 😮‍💨
+Let's change that to see how CodeQL works and notifies us in a pull-request before it's too late.
 
 Conduct the following actions in a **checked-out repository on your local machine or from within a GitHub Codespace**:
 
-1. Open a Terminal and checkout the `add-codeql` Branch we've just created:
+1. Open a Terminal and checkout the `add-codeql` branch we have just created:
 
     ```bash
     git fetch --all
@@ -252,11 +252,11 @@ Conduct the following actions in a **checked-out repository on your local machin
       // if (u.startsWith("javascript:")) {
       //   return "about:blank";
       // }
-      // return url;
+      return url;
     }
     ```
 
-3. Remove the comments (by removing the `//`-characters in front) so it looks like this:
+3. There is some outcommented code which is, in fact, insecure. Just what we wanted - go ahead and remove the comments (by removing the `//`-characters in front):
 
     ```tsx
     function sanitizeUrl(url: string) {
@@ -277,13 +277,13 @@ Conduct the following actions in a **checked-out repository on your local machin
    git push
    ```
 
-This will trigger the CodeQL workflow again, and this time, it will find a vulnerability in our code!
+This will trigger the Code scanning workflow in our pull request again.
 
 ### 2.3 - Check the code scanning results
 
 After the Code scanning workflow has finished, navigate into the pull request and inspect the results.
 
-1. As expected, it no found the vulnerability we just introduced. Let's quickly click on *Details* to find out more.
+1. As expected, it now found the vulnerability we have just introduced. Let's quickly click on *Details* to find out more.
 
     ![Screenshot of some status checks of a GitHub pull request with a failed Code scanning job](images/004/failed_codeql_run.png)
 
