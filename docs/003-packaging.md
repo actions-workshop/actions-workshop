@@ -84,6 +84,9 @@ You can see many actions related to Docker, for this lab you will use the follow
         - run: npm ci
         - run: npm run build --if-present
         - run: npm test
+        - name: 'Report Coverage'
+          uses:  davelosert/vitest-coverage-report-action@v2
+          if: always()
         
       package-and-publish:
         needs: 

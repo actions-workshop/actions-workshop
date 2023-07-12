@@ -217,9 +217,7 @@ jobs:
       - run: npm run build
       - run: npm run test
       - name: 'Report Coverage'
-        uses:  davelosert/vitest-coverage-report-action@v1
-        with:
-          vite-config-path: vite.config.ts
+        uses:  davelosert/vitest-coverage-report-action@v2
 ```
 
 </details>
@@ -261,10 +259,8 @@ Let's try this out in this project:
   
       ```yml
       - name: 'Report Coverage'
-        uses:  davelosert/vitest-coverage-report-action@v1
+        uses:  davelosert/vitest-coverage-report-action@v2
         if: always()
-        with:
-          vite-config-path: vite.config.ts
       ```
 
 3. Commit the changes and wait for the workflow to run through
