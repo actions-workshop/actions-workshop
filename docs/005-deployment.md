@@ -227,10 +227,8 @@ jobs:
     - run: npm run build --if-present
     - run: npm test
     - name: 'Report Coverage'
-      if: always() # Also generate the report if tests are failing
-      uses:  davelosert/vitest-coverage-report-action@v1
-      with:
-        vite-config-path: vite.config.ts
+      if: always()
+      uses:  davelosert/vitest-coverage-report-action@v2
   
   package-and-publish:
     needs: 
