@@ -2,7 +2,7 @@
 
 ## 1 - Inspect the repository
 
-This repository contains a [React](https://reactjs.org/)-based application built with [Vite](https://vitejs.dev/). We aim to automate its testing and building in this segment of the workshop.
+This repository contains a [React](https://reactjs.org/)-based application built with [Vite](https://vitejs.dev/). We aim to automate its testing and building in this lab.
 
 Feel free to explore the files if you're curious about the app's operation (though it's not strictly necessary for understanding the remainder of the workshop).
 
@@ -20,9 +20,9 @@ To test the container, run `docker build . -t local:latest` to build the image a
 
 ### 2.1 - Use a starter workflow
 
-To build a workflow that employs Actions for automating the Continuous Integration process, start by adding a **starter workflow** to your repository:
+To build a workflow that employs Actions for your Continuous Integration process, start by adding a **starter workflow** to your repository:
 
-1. From your repository's main view, find an navigate to the **Actions** tab.
+1. From your repository's main view, find and navigate to the **Actions** tab.
 2. Select **New workflow**.
 3. Search for `Node.js`.
 4. Click **Configure** under the `Node.js` starter workflow.
