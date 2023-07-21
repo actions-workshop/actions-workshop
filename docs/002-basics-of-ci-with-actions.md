@@ -122,7 +122,7 @@ The result of your last push to the main branch should resemble the following:
 
 ## 3 - Add code coverage to your workflow
 
-When setting up CI for your project, it's common to provide additional information to users, such as test "*code coverage*".
+When setting up CI for your project, it's common to provide additional information to users, such as code coverage stats for the project's tests.
 
 Doing that is straightforward with GitHub Actions. You determine where and when a specific task should occur, and then search for an appropriate action in the [GitHub Marketplace](https://github.com/marketplace?category=&query=&type=actions&verification=).
 
