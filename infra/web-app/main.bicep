@@ -20,7 +20,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2022-09-01' = {
   location: location
   tags: {
     actor: actor
-    purpose: 'actions-workshop'
+    purpose: 'GitHub Actions Workshop'
     repository: repository
   }
 }

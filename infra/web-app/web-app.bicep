@@ -37,7 +37,7 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
   kind: 'app,linux,container'
   tags: {
     actor: actor
-    purpose: 'actions-workshop'
+    purpose: 'GitHub Actions Workshop'
     repository: repository
   }
   properties: {
