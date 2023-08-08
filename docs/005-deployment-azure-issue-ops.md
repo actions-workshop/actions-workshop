@@ -15,36 +15,47 @@ Once you have deployed, you will configure an approval on the Environment for fu
 
 ## 1 - Request your Deployment Environment using Issue Ops
 
-Issue Ops is a term coined by GitHub to describe a way to use GitHub Issues to trigger actions and do certain operations.
+Let's first talk briefly about Issue Ops: It is a term or pattern to describe a way to use (GitHub) Issues to trigger and automate certain operations. As you know, GitHub Actions do allow issue-events (like creation, update, delete etc.) to trigger action workflows, so it is very easy to implement this with GitHub Actions.
 
-In this Lab, we will use this functionality to request access to Azure for your demo-repository.
+You should've received a URL from your trainer pointing to another GitHub Repository. A new Issue opened in this repository will trigger an action workflow that will create a full deployment environment in Azure and write back some Actions Variables into your workshop repository that are required in the next step.
 
-tbd.
+This is a perfect examle of issue ops: In a potential real case scenario, this repository could be owned by your operations- or security team, and through issue ops, they give you a nice way to self-serve a deployment-environment request while staying in full control of the automation, as well as having full transparency and auditability of the process.
+
+Let's request our deployment environment by doing the following:
+
+1. Navigate to the URL of the deployment environment repository that you recieved from your trainer
+2. Click on `Issues` -> `New Issue`
+3. You will see a list of [Issue Templates](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository) - pick `Request a Deployment Environment`
+4. You will see a form with s single input field. You will have to enter your repository name with the leading organization name (you can simply copy it from the URL of your repository - the part after github.com).
+5. Submit the issue by clicking on `Submit new issue`
+6. You will recieve a comment from the GitHub Bot telling you that the environment is being created. Go to the `Actions` tab of the repository and try if you can see the workflow that was triggered by your issue creation.
+7. Once the workflow completes, the comment in the issue will be updated with a success message, which means you can continue.
 
 ### 1.2 Create a new Action Variable
 
-You have already learned to how utilize variables from within a workflow. But so far, we you were only  using variables that are provided to you by GitHub itself. Let's learn how you can add your own variables (and secrets) to make it easier to define repository-specific configurations and other values that you might not want to hard-code into your workflow files.
+You have already learned to how utilize variables from within a workflow. But so far, we you were only using variables that are provided to you by GitHub itself. Let's learn how you can add your own variables (and also secrets) to make it easier to define repository-specific configurations and other values that you might not want to hard-code into your workflow files.
 
 1. Navigate to your repositorie's `Settings`, unfold `Secrets and variables` and select `Actions`
     ![Navigate to Actions Secrets](images/005/navigate-to-actions-secrets.png)
 
 2. Let's stop here for a second and recognize that there are already some `Organization secrets` defined (`AZ_SUBSCRIPTION_ID`, `AZ_TENANT_ID`). These are secrets created for you by your Organization's administrator and they will allow you to authenticate against Azure with a Service Principal (alias Machine User) to conduct your deployment. You can (and will) access those secrets from within your workflow files under the `secrets`-namespace (so e.g. `secrets.AZ_CLIENT_ID`). You can read more on the scopes of secrets and variables below.
 
-3. Navigate to the `Variables` tab and click on `New repository variable`
+3. Navigate to the `Variables` tab. Stop again to realize that there are already two variables `AZ_CLIENT_ID` and `AZ_RESOURCE_GROUP`
 
     ![Navigate to New repository variable](images/005/navigate-to-variables.png)
 
-4. Use `APP_NAME` as the Name of the variable and provide a value of your choice - preferrably your repositorie's name (as the Appname needs to be unique for all of Azure Web Services, choose something not too simple). Click on `Add variable` once you are done.
+4. Click on `New repository variable` and use `AZ_APP_NAME` as the Name of the variable and provide a value of your choice - preferrably your repositorie's name (as the Appname needs to be unique for all of Azure Web Services, choose something that is not too simple). Click on `Add variable` once you are done.
     ![Create a new variable](images/005/create-new-variable.png)
 
-Now you have created a variable that will be accessible from all workflows within this repository as `${{ vars.APP_NAME }}` - and we will make use of this in our deployment workflow.
+Now you have created a variable that will be accessible from all workflows within this repository as `${{ vars.AZ_APP_NAME }}` - and we will make use of this in our deployment workflow.
 
 <details>
-  <summary>(optional) Understand Azure and the provided secrets</summary>
+  <summary>(optional) Understand Azure and the provided secrets and variables</summary>
   
 - **AZ_TENANT_ID**: An Azure Tenant is basically the Azure Account itself. So this ID specifies into which Azure Account we are supposed to login and deploy our App to later.
 - **AZ_SUBSCRIPTION_ID**: In Azure, a Subscription is a billing unit, meaning that all resources defined beneath it will be billed with the information provided on the subscription. Everything you deploy into azure must be within a subscription - so you can also view it as a Top-Level Grouping Mechanism.
 - **AZ_CLIENT_ID**: The `ClientId` is something like the Username of the machine users that was given Access through the OIDC Configuration. There are other ways of authentication (e.g. with Certificates or Passwords) which are also supported by GitHub, but out of scope of this workshop.
+- **AZ_RESOURCE_GROUP**: A Resource Group is a container for all kinds of Services in Azure that allows you to, well, group services that belong together, but also apply permissions for Service Principals specific to that Resource Group. Eg. in this lab, you will only have access to the resource group that was created for you and provided as variable.
   
 </details>
 
