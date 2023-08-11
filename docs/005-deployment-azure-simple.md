@@ -113,7 +113,7 @@ In the previous labs, you built the application and packaged it into a container
 
 You could navigate to the portal and create an Azure Container App and point it to your Packages in GitHub - but a better practice is to describe the resources using code (Infrastructure as Code). This project has some [Bicep](https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview?tabs=bicep) scripts, but Terraform would also work.
 
-### Infrastructure as Code
+### 2.1 Use Infrastructure as Code
 
 The Bicep files for the deployment are in the [`/infra/container-app`](../infra/container-app/) folder in the repo. There are 4 files:
 
@@ -126,7 +126,7 @@ The Bicep files for the deployment are in the [`/infra/container-app`](../infra/
 
 To provision the infrastructure services and deploy the application, you can invoke the Azure CLI (`az cli`). You will shortly modify the workflow to add this step. However, first you need to make the Package feed public.
 
-### Make the Package public
+### 2.2 Make the Package public
 
 It is not best practice to make the container images public, unless you are developing open source code. However, to simplify this lab you are going to do so. In "real life" you can leave the Package feed private and would simply add the registry credentials to the Azure resource so that Azure can pull the container images.
 
@@ -143,7 +143,7 @@ It is not best practice to make the container images public, unless you are deve
 
     ![Confirm the change](images/005/change-visibility.png)
 
-### Modify the Workflow
+### 2.3 Modify the Workflow
 
 You can now modify the workflow to automate the deployment of the application.
 

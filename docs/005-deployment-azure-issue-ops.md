@@ -23,31 +23,36 @@ This is a perfect examle of issue ops: In a potential real case scenario, this r
 
 Let's request our deployment environment by doing the following:
 
+### 1.1 Request a Deployment Environment
+
 1. Navigate to the URL of the deployment environment repository that you recieved from your trainer
 2. Click on `Issues` -> `New Issue`
+    ![Navigate to Issues Page](./images/005/issue-ops-001-navigate-issue.png)
 3. You will see a list of [Issue Templates](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository) - pick `Request a Deployment Environment`
-4. You will see a form with s single input field. You will have to enter your repository name with the leading organization name (you can simply copy it from the URL of your repository - the part after github.com).
-5. Submit the issue by clicking on `Submit new issue`
-6. You will recieve a comment from the GitHub Bot telling you that the environment is being created. Go to the `Actions` tab of the repository and try if you can see the workflow that was triggered by your issue creation.
+    ![Select Issue Template](./images/005/issue-ops-002-select-issue-template.png)
+4. You will see a form with s single input field. You will have to enter your repository name with the leading organization name (you can simply copy it from the URL of your repository - the part after github.com). Submit the issue afterwards.
+    ![Fill out Issue Template](./images/005/issue-ops-003-fill-issue-template.png)
+6. You will recieve a comment from the GitHub-Actions-Bot telling you that the environment is being created. Go to the `Actions` tab of the repository and try if you can see the workflow that was triggered by your issue creation.
 7. Once the workflow completes, the comment in the issue will be updated with a success message, which means you can continue.
+    ![Success message of the GitHub Bot](./images/005/issue-ops-004-view-issue-success-comment.png)
 
 ### 1.2 Create a new Action Variable
 
 You have already learned to how utilize variables from within a workflow. But so far, we you were only using variables that are provided to you by GitHub itself. Let's learn how you can add your own variables (and also secrets) to make it easier to define repository-specific configurations and other values that you might not want to hard-code into your workflow files.
 
 1. Navigate to your repositorie's `Settings`, unfold `Secrets and variables` and select `Actions`
-    ![Navigate to Actions Secrets](images/005/navigate-to-actions-secrets.png)
-
+    ![Navigate to Actions Secrets](./images/005/issue-ops-005-navigate-secrets.png)
 2. Let's stop here for a second and recognize that there are already some `Organization secrets` defined (`AZ_SUBSCRIPTION_ID`, `AZ_TENANT_ID`). These are secrets created for you by your Organization's administrator and they will allow you to authenticate against Azure with a Service Principal (alias Machine User) to conduct your deployment. You can (and will) access those secrets from within your workflow files under the `secrets`-namespace (so e.g. `secrets.AZ_CLIENT_ID`). You can read more on the scopes of secrets and variables below.
 
-3. Navigate to the `Variables` tab. Stop again to realize that there are already two variables `AZ_CLIENT_ID` and `AZ_RESOURCE_GROUP`
+3. Navigate to the `Variables` tab. Stop again to recognize that there are already two variables `AZ_CLIENT_ID` and `AZ_RESOURCE_GROUP`. These are the variables that were created by the Issue Ops Workflow in Step [1.1 Request a Deployment Environment](#11-request-a-deployment-environment)
 
-    ![Navigate to New repository variable](images/005/navigate-to-variables.png)
+    ![Navigate to New repository variable](./images/005/issue-ops-006-navigate-variables.png)
 
 4. Click on `New repository variable` and use `AZ_APP_NAME` as the Name of the variable and provide a value of your choice - preferrably your repositorie's name (as the Appname needs to be unique for all of Azure Web Services, choose something that is not too simple). Click on `Add variable` once you are done.
-    ![Create a new variable](images/005/create-new-variable.png)
+    ![Create a new variable](images/005/issue-ops-007-create-az-app-name.png)
 
-Now you have created a variable that will be accessible from all workflows within this repository as `${{ vars.AZ_APP_NAME }}` - and we will make use of this in our deployment workflow.
+5. Review the final available variables. All these variables will be available to you in your actions workflows under the `vars` scope (e.g. `${{ vars.AZ_APP_NAME }}`) and we will use them in the subsequent steps.
+   ![Final variables](images/005/issue-ops-008-final-variables.png)
 
 <details>
   <summary>(optional) Understand Azure and the provided secrets and variables</summary>
@@ -83,12 +88,29 @@ A best practice when it comes to deployments is to describe the resources using 
 
 The Bicep file for the deployment is [`/infra/web-app/web-app.bicep`](../infra/web-app/web-app.bicep).
 
-To provision the infrastructure services and deploy the appcation, you can invoke the Azure CLI (`az cli`). You will shortly modify the workflow to add this step. However, first you need to make the Package feed public.
-
 > **Note**
 > You can ignore the other file `main.bicep` in the `infra` folder. It is used by another deployment type and out of scope for this workshop.
 
-### 2.2 Add the deployment step to workflow
+To provision the infrastructure services and deploy the appcation, you can invoke the Azure CLI (`az cli`). You will shortly modify the workflow to add this step. However, first you need to make the Package feed public.
+
+### 2.2 Make the Package public
+
+It is not best practice to make the container images public, unless you are developing open source code. However, to simplify this lab you are going to do so. In "real life" you can leave the Package feed private and would simply add the registry credentials to the Azure resource so that Azure can pull the container images.
+
+1. Navigate to your GitHub repo page and click on **Packages**. Locate the Package and open it.
+1. On the bottom right, click the **Package Settings** button:
+
+    ![Click on Package settings](images/005/package-settings-button.png)
+
+1. Scroll to the bottom of the page and click on **Change visibility**:
+
+    ![Click change visibility](images/005/danger-zone.png)
+
+1. Change the visibility to **Public**, type in the name of the repo and click the confirm button:
+
+    ![Confirm the change](images/005/change-visibility.png)
+
+### 2.3 Add the deployment step to workflow
 
 You can now modify the workflow to automate the deployment of the application.
 
@@ -125,6 +147,14 @@ Open the `node.js.yml` file. After the `package-and-publish` job, add the follow
             template: ./infra/web-app/web-app.bicep
             resourceGroupName: ${{ vars.AZ_RESOURCE_GROUP }}
             parameters: "location=westeurope appName=${{ vars.AZ_APP_NAME }} containerImage=${{ needs.package-and-publish.outputs.container }} actor=${{ github.actor }} repository=${{ github.repository }}"
+```
+
+Note that, again, you need to set [explicit permissions](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token) for the `GITHUB_TOKEN` as `id-token: write` permissions are required to request the OIDC JWT ID token.
+
+```yml
+    permissions:
+        id-token: write
+        contents: read
 ```
 
 Lastly you need to add an [output](https://docs.github.com/en/actions/using-jobs/defining-outputs-for-jobs) to your `package-and-publish` job to get the name of the container image from your registry. This is being used in the Azure deployment to set up the Container hosting.
@@ -282,11 +312,11 @@ Now that the deployment is working, you may want to enforce a manual approval.
 
 ## Conclusion
 
-In this lab you learned how creatge action variables, and used them to deploy your application to a cloud provider. You also configured rules for the environment to enforce good practices.
+In this lab you have learned how to:
 
-- 👏 About Action [Secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets) and [Variables](https://docs.github.com/en/actions/learn-github-actions/variables) to store sensitive information and / or configuration values as well as their scopes
-- 👏 How to use Infrastructre as Code to make deployments a breeze
-- 👏 How to use actions to login and deploy to Azure
+- 👏 Use Action [Secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets) and [Variables](https://docs.github.com/en/actions/learn-github-actions/variables) to store sensitive information and / or configuration values as well as their scopes
+- 👏 Use Infrastructre as Code to make deployments a breeze
+- 👏 Use actions to login and deploy to Azure
 - 👏 Create an environment and configure approvers for good deployment pracitces
 
 That also concludes this workshop. We hope you enjoyed it and learned something new!

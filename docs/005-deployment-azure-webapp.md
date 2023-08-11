@@ -69,7 +69,24 @@ The Bicep files for the deployment are in the [`/infra/web-app`](../infra/web-ap
 
 To provision the infrastructure services and deploy the appcation, you can invoke the Azure CLI (`az cli`). You will shortly modify the workflow to add this step. However, first you need to make the Package feed public.
 
-### 2.2 Add the deployment step to workflow
+### 2.2 Make the Package public
+
+It is not best practice to make the container images public, unless you are developing open source code. However, to simplify this lab you are going to do so. In "real life" you can leave the Package feed private and would simply add the registry credentials to the Azure resource so that Azure can pull the container images.
+
+1. Navigate to your GitHub repo page and click on **Packages**. Locate the Package and open it.
+1. On the bottom right, click the **Package Settings** button:
+
+    ![Click on Package settings](images/005/package-settings-button.png)
+
+1. Scroll to the bottom of the page and click on **Change visibility**:
+
+    ![Click change visibility](images/005/danger-zone.png)
+
+1. Change the visibility to **Public**, type in the name of the repo and click the confirm button:
+
+    ![Confirm the change](images/005/change-visibility.png)
+
+### 2.3 Add the deployment step to workflow
 
 You can now modify the workflow to automate the deployment of the application.
 
@@ -262,11 +279,11 @@ Now that the deployment is working, you may want to enforce a manual approval.
 
 ## Conclusion
 
-In this lab you learned how creatge action variables, and used them to deploy your application to a cloud provider. You also configured rules for the environment to enforce good practices.
+In this lab you learned:
 
-- 👏 About Action [Secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets) and [Variables](https://docs.github.com/en/actions/learn-github-actions/variables) to store sensitive information and / or configuration values as well as their scopes
-- 👏 How to use Infrastructre as Code to make deployments a breeze
-- 👏 How to use actions to login and deploy to Azure
+- 👏 Use Action [Secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets) and [Variables](https://docs.github.com/en/actions/learn-github-actions/variables) to store sensitive information and / or configuration values as well as their scopes
+- 👏 Use Infrastructre as Code to make deployments a breeze
+- 👏 Use OIDC to login and deploy to Azure without a password
 - 👏 Create an environment and configure approvers for good deployment pracitces
 
 That also concludes this workshop. We hope you enjoyed it and learned something new!
