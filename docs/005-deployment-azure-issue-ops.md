@@ -95,7 +95,7 @@ While it's generally not recommended to make container images public (unless you
 
 1. Head to your repository's main page and click on **Packages**. Search for the relevant package and open it.
 
-2. Click the **Package Settings** button at the bottom right of the page:
+2. Click the **Package settings** button at the bottom right of the page:
 
     ![Click on Package settings](images/005/package-settings-button.png)
 
