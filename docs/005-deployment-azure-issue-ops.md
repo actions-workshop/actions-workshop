@@ -313,7 +313,7 @@ In this lab, you have learned how to:
 
 - 👏 Utilize [Actions secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets) and [Actions variables](https://docs.github.com/en/actions/learn-github-actions/variables) to store sensitive information and/or configuration values, and understand their scopes.
 - 👏 Employ Infrastructure as Code to simplify deployments.
-- 👏 Use Actions to log into and deploy applications to Azure.
+- 👏 Set up secure, secret-less authentication to Azure via OIDC.
 - 👏 Set up an environment and designate approvers for best deployment practices.
 
 This marks the conclusion of our workshop. We hope you found it enlightening and had a ton of fun along the way!
