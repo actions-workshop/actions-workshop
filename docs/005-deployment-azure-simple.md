@@ -1,6 +1,6 @@
 # Part 5 - Deployment
 
-In a previous lab, you used GitHub Actions to package an application into a Docker image and publish that package to the GitHub Container Registry. The next step in a classic Continuous Delivery process is to **deploy** the application.
+In a previous lab, you used GitHub Actions to package an application into a Docker image and publish that package to the GitHub Container registry. The next step in a classic continuous delivery process is to **deploy** the application.
 
 In this lab, you will extend the workflow to deploy the container image to [Azure Container Apps](https://azure.microsoft.com/en-gb/products/container-apps/), a managed Kubernetes service in Azure.
 

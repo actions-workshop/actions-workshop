@@ -1,6 +1,6 @@
 # Part 5 - Deployment
 
-In a previous lab, you used GitHub Actions to package an application into a Docker image and publish that package to the GitHub Container Registry. The next step in a classic Continuous Delivery process is to **deploy** the application.
+In a previous lab, you used GitHub Actions to package an application into a Docker image and publish that package to the GitHub Container registry. The next step in a classic continuous delivery process is to **deploy** the application.
 
 In this lab, you will extend the workflow to deploy the container image to [Azure Web Apps](https://azure.microsoft.com/en-us/products/app-service/web), a managed web application service in Azure that also supports container deployment.
 
@@ -43,7 +43,7 @@ You have already learned how to utilize variables within a workflow. However, up
 
 1. Navigate to your repository's **Settings**, expand **Secrets and variables**, and select **Actions**.
     ![Navigate to Actions secrets](./images/005/issue-ops-005-navigate-secrets.png)
-2. Pause here and observe that there are already some **Organization secrets** defined: `AZ_SUBSCRIPTION_ID` and `AZ_TENANT_ID`. These secrets were created for you by your organization's administrator, allowing you to authenticate against Azure with a Service Principal (also known as Machine User) to execute your deployment. You can (and will) access these secrets from your workflow files under the `secrets` namespace (e.g., `secrets.AZ_CLIENT_ID`). Further details on the scopes of secrets and variables are provided below.
+2. Pause here and observe that there are already some organization secrets defined: `AZ_SUBSCRIPTION_ID` and `AZ_TENANT_ID`. These secrets were created for you by your organization's administrator, allowing you to authenticate against Azure with a service principal (also known as "machine user") to execute your deployment. You can (and will) access these secrets from your workflow files under the `secrets` namespace (e.g., `secrets.AZ_CLIENT_ID`). Further details on the scopes of secrets and variables are provided below.
 3. Navigate to the **Variables** tab. Note that two variables, `AZ_CLIENT_ID` and `AZ_RESOURCE_GROUP`, are already present. These were created by the IssueOps workflow in step [1.1 Request a deployment environment](#11-request-a-deployment-environment).
     ![Click on New repository variable](./images/005/issue-ops-006-navigate-variables.png)
 4. Click on **New repository variable**. Name the variable `AZ_APP_NAME` and provide a value of your choice, preferably your repository's name (since the app name needs to be unique across all Azure web services, choose something distinctive). Click on **Add variable** once finished.
@@ -54,10 +54,10 @@ You have already learned how to utilize variables within a workflow. However, up
 <details>
   <summary>(optional) Understand Azure and the provided secrets and variables</summary>
 
-- `AZ_TENANT_ID`: An Azure Tenant essentially represents the Azure account itself. This ID indicates the specific Azure account we will be logging into and deploying our app to later on.
-- `AZ_SUBSCRIPTION_ID`: In Azure, a Subscription functions as a billing unit, meaning that all associated resources will be billed based on the information linked to the subscription. Everything deployed to Azure must exist within a subscription, so you can view it as a top-level organizational mechanism.
-- `AZ_CLIENT_ID`: The `ClientId` is akin to the username of the machine user granted access through the OIDC configuration. There are other authentication methods (e.g., using certificates or passwords) supported by GitHub, but they're outside the scope of this workshop.
-- `AZ_RESOURCE_GROUP`: A Resource Group in Azure is a container for various services. It allows you to group together related services and also to set permissions specific to that Resource Group for Service Principals. For instance, in this lab, you will only have access to the resource group specifically created for you and provided as a variable.
+- `AZ_TENANT_ID`: An Azure tenant essentially represents the Azure account itself. This ID indicates the specific Azure account we will be logging into and deploying our app to later on.
+- `AZ_SUBSCRIPTION_ID`: In Azure, a subscription functions as a billing unit, meaning that all associated resources will be billed based on the information linked to the subscription. Everything deployed to Azure must exist within a subscription, so you can view it as a top-level organizational mechanism.
+- `AZ_CLIENT_ID`: The "client ID" is akin to the username of the machine user granted access through the OIDC configuration. There are other authentication methods (e.g., using certificates or passwords) supported by GitHub, but they're outside the scope of this workshop.
+- `AZ_RESOURCE_GROUP`: A resource group in Azure is a container for various services. It allows you to group together related services and also to set permissions specific to that resource group for service principals. For instance, in this lab, you will only have access to the resource group specifically created for you and provided as a variable.
 </details>
 
 ### 1.3 Scopes of secrets and variables
@@ -77,7 +77,7 @@ For instance, if you have a secret at the organization level named `SECRET` with
 
 ## 2 - Extend the workflow to deploy to staging
 
-Time to put everything into action with a real deployment. In previous labs, you built the application and packaged it into a container image, which was then published to the GitHub Container Registry. To launch the application, you need to run this container image. Multiple methods exist to achieve this, such as through Azure Container Instances, Azure Web Apps for Linux, or within a Kubernetes cluster like Azure Kubernetes Services (AKS). Additionally, Azure offers a managed web app service known as Azure Web Apps, capable of running container instances. For this workshop, you will deploy the container image to Azure Web Apps.
+Time to put everything into action with a real deployment. In previous labs, you built the application and packaged it into a container image, which was then published to the GitHub Container registry. To launch the application, you need to run this container image. Multiple methods exist to achieve this, such as through Azure Container Instances, Azure Web Apps for Linux, or within a Kubernetes cluster like Azure Kubernetes Services (AKS). Additionally, Azure offers a managed web app service known as Azure Web Apps, capable of running container instances. For this workshop, you will deploy the container image to Azure Web Apps.
 
 A recommended best practice for deployments involves defining resources via code (Infrastructure as Code or IaC). This project comes equipped with [Bicep](https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview?tabs=bicep) scripts that detail the entire infrastructure. However, alternatives like Terraform can also be used for that purpose.
 

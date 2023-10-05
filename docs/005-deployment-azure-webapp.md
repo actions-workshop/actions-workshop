@@ -1,13 +1,13 @@
 # Part 5 - Deployment
 
-In a previous lab, you used GitHub Actions to package an application into a Docker image and publish that package to the GitHub Container Registry. The next step in a classic Continuous Delivery process is to **deploy** the application.
+In a previous lab, you used GitHub Actions to package an application into a Docker image and publish that package to the GitHub Container registry. The next step in a classic continuous delivery process is to **deploy** the application.
 
 In this lab, you will extend the workflow to deploy the container image to [Azure Web Apps](https://azure.microsoft.com/en-us/products/app-service/web), a managed web application service in Azure that also supports container deployment.
 
 You will learn how to easily authenticate against Azure using an action, use Actions variables to define configuration values for your actions, and establish manual deployment approvals for your environments.
 
 > **Note**
-> The Azure account you will use in this workshop is provided for you, so there's no need to create one yourself. Access is granted through Organization secrets, which you will learn about in the first step of this lab.
+> The Azure account you will use in this workshop is provided for you, so there's no need to create one yourself. Access is granted through organization secrets, which you will learn about in the first step of this lab.
 
 ## 1 - Action variables and secrets
 
@@ -18,7 +18,7 @@ You have already learned how to utilize variables within a workflow. However, up
 1. Navigate to your repository's **Settings**, expand **Secrets and variables**, and select **Actions**.
     ![Navigate to Actions secrets](./images/005/navigate-to-actions-secrets.png)
 
-2. Pause here and observe that there are already some **Organization secrets** defined: `AZ_CLIENT_ID`, `AZ_SECRET`, `AZ_SUBSCRIPTION_ID`, and `AZ_TENANT_ID`. These secrets were created for you by your organization's administrator, allowing you to authenticate against Azure with a Service Principal (also known as Machine User) to execute your deployment. You can (and will) access these secrets from your workflow files under the `secrets` namespace (e.g., `secrets.AZ_CLIENT_ID`). Further details on the scopes of secrets and variables are provided below.
+2. Pause here and observe that there are already some organization secrets defined: `AZ_CLIENT_ID`, `AZ_SECRET`, `AZ_SUBSCRIPTION_ID`, and `AZ_TENANT_ID`. These secrets were created for you by your organization's administrator, allowing you to authenticate against Azure with a service principal (also known as "machine user") to execute your deployment. You can (and will) access these secrets from your workflow files under the `secrets` namespace (e.g., `secrets.AZ_CLIENT_ID`). Further details on the scopes of secrets and variables are provided below.
 
 3. Navigate to the **Variables** tab  and click on **New repository variable**.
 
@@ -54,7 +54,7 @@ For instance, if you have a secret at the organization level named `SECRET` with
 
 ## 2 - Extend the workflow to deploy to staging
 
-Time to put everything into action with a real deployment. In previous labs, you built the application and packaged it into a container image, which was then published to the GitHub Container Registry. To launch the application, you need to run this container image. Multiple methods exist to achieve this, such as through Azure Container Instances, Azure Web Apps for Linux, or within a Kubernetes cluster like Azure Kubernetes Services (AKS). Additionally, Azure offers a managed web app service known as Azure Web Apps, capable of running container instances. For this workshop, you will deploy the container image to Azure Web Apps.
+Time to put everything into action with a real deployment. In previous labs, you built the application and packaged it into a container image, which was then published to the GitHub Container registry. To launch the application, you need to run this container image. Multiple methods exist to achieve this, such as through Azure Container Instances, Azure Web Apps for Linux, or within a Kubernetes cluster like Azure Kubernetes Services (AKS). Additionally, Azure offers a managed web app service known as Azure Web Apps, capable of running container instances. For this workshop, you will deploy the container image to Azure Web Apps.
 
 A recommended best practice for deployments involves defining resources via code (Infrastructure as Code or IaC). This project comes equipped with [Bicep](https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview?tabs=bicep) scripts that detail the entire infrastructure. However, alternatives like Terraform can also be used for that purpose.
 
