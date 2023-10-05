@@ -9,23 +9,23 @@ You will learn how to easily authenticate against Azure using an action, use Act
 > **Note**
 > The Azure account you will use in this workshop is provided for you, so there's no need to create one yourself. Access is granted through organization secrets, which you will learn about in the first step of this lab.
 
-## 1 - Action variables and secrets
+## 1 - Actions variables and secrets
 
 ### 1.1 Create a new Actions variable
 
 You have already learned how to utilize variables within a workflow. However, up to now, you have only used variables provided by GitHub itself. Now, let's learn how to add your own variables (and secrets) to define repository-specific configurations and other values that you might not want to hard-code into your workflow files.
 
 1. Navigate to your repository's **Settings**, expand **Secrets and variables**, and select **Actions**.
-    ![Navigate to Actions secrets](./images/005/navigate-to-actions-secrets.png)
+    ![Navigate to Actions secrets](./images/005/issue-ops-005-navigate-secrets.png)
 
 2. Pause here and observe that there are already some organization secrets defined: `AZ_CLIENT_ID`, `AZ_SECRET`, `AZ_SUBSCRIPTION_ID`, and `AZ_TENANT_ID`. These secrets were created for you by your organization's administrator, allowing you to authenticate against Azure with a service principal (also known as "machine user") to execute your deployment. You can (and will) access these secrets from your workflow files under the `secrets` namespace (e.g., `secrets.AZ_CLIENT_ID`). Further details on the scopes of secrets and variables are provided below.
 
 3. Navigate to the **Variables** tab  and click on **New repository variable**.
 
-    ![Click on New repository variable](images/005/navigate-to-variables.png)
+    ![Click on New repository variable](images/005/issue-ops-006-navigate-variables.png)
 
 4. Name the variable `AZ_APP_NAME` and provide a value of your choice, preferably your repository's name (since the app name needs to be unique across all Azure web services, choose something distinctive). Click on **Add variable** once finished.
-    ![Create a new variable](./images/005/create-new-variable.png)
+    ![Create a new variable](./images/005/issue-ops-007-create-az-app-name.png)
 
 Now, you've created a variable that will be accessible from all workflows within this repository as `${{ vars.APP_NAME }}`. We will make use of this in our deployment workflow.
 
@@ -34,7 +34,7 @@ Now, you've created a variable that will be accessible from all workflows within
 
 - `AZ_TENANT_ID`: An Azure tenant essentially represents the Azure account itself. This ID indicates the specific Azure account we will be logging into and deploying our app to later on.
 - `AZ_SUBSCRIPTION_ID`: In Azure, a subscription functions as a billing unit, meaning that all associated resources will be billed based on the information linked to the subscription. Everything deployed to Azure must exist within a subscription, so you can view it as a top-level organizational mechanism.
-- `AZ_CLIENT_ID` and `AZ_SECRET`: These are the credentials for the machine user (or "service principal" in Azure terminology) used for automated deployments. The "client ID" functions as the username, while the "secret" is the password. While there are other authentication methods (e.g., passwordless through OIDC) supported by GitHub, they are beyond the scope of this workshop.
+- `AZ_CLIENT_ID` and `AZ_SECRET`: These are the credentials for the machine user (or "service principal" in Azure terminology) used for automated deployments. The "client ID" functions as the username, while the "secret" is the password. While there are other authentication methods supported by GitHub (e.g., passwordless through OIDC), they are beyond the scope of this workshop.
 </details>
 
 ### 1.2 Scopes of secrets and variables
@@ -64,7 +64,7 @@ The Bicep files for deployment are in the [`/infra/web-app`](../infra/web-app/) 
 
 | File            | Description                                                                                                                   |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `main.bicep`    | The main infrastructure file, which creates an Azure Resource Group and invokes the other files to create the full environment |
+| `main.bicep`    | The main infrastructure file, which creates an Azure resource group and invokes the other files to create the full environment |
 | `web-app.bicep` | Specifies the app itself, as a web app for containers                                                                          |
 
 To set up the necessary infrastructure services and deploy the application, you will use the Azure command-line interface (`az cli`). Soon, you will integrate this step into the workflow. Before that, though, it's essential to make the package publicly accessible.
@@ -130,7 +130,7 @@ Finally, you must include an [`output`](https://docs.github.com/en/actions/using
 ```yml
      runs-on: ubuntu-latest
      outputs:
-      container: ${{ steps.meta.outputs.tags }}
+       container: ${{ steps.meta.outputs.tags }}
 ```
 
 <details>
