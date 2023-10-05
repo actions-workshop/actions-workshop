@@ -1,4 +1,4 @@
-@description('The Azure Location to create the resources in')
+@description('The Azure location to create the resources in')
 param location string = 'westeurope'
 
 @description('Name for the serviceplan and webapp (defines the subdomain)')
@@ -7,7 +7,7 @@ param appName string
 @description('The container image to deploy')
 param containerImage string
 
-@description('The actor (GitHUb Username) that started the deployment')
+@description('The actor (GitHUb username) that started the deployment')
 param actor string
 
 @description('The repository that started the deployment')
@@ -20,7 +20,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2022-09-01' = {
   location: location
   tags: {
     actor: actor
-    purpose: 'GitHub Actions Workshop'
+    purpose: 'GitHub Actions workshop'
     repository: repository
   }
 }
