@@ -65,8 +65,8 @@ You can see many actions related to Docker, for this lab you will use the follow
         branches: [ "main" ]
       pull_request:
         branches: [ "main" ]
-      workflow_dispatch: 
-      
+      workflow_dispatch:
+
     jobs:
       build:
         name: "Build and Test"
@@ -87,20 +87,20 @@ You can see many actions related to Docker, for this lab you will use the follow
         - name: 'Report Coverage'
           uses:  davelosert/vitest-coverage-report-action@v2
           if: always()
-        
+
       package-and-publish:
-        needs: 
+        needs:
           - build
-   
+
         name: 🐳 Package & Publish
         runs-on: ubuntu-latest
         permissions:
           contents: read
           packages: write
-        
+
         steps:
           - uses: actions/checkout@v3
-          
+
           - name: Set up Docker Buildx
             uses: docker/setup-buildx-action@v2
 
@@ -187,6 +187,6 @@ In this lab you have learned how to :
 
 ---
 
-Next :
+Next:
 
 - **[Security](004-security.md)**

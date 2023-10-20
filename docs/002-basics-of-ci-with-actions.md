@@ -309,6 +309,6 @@ In this lab, you have learned how to:
 
 ---
 
-Next :
+Next:
 
 - **[Packaging](003-packaging.md)**
