@@ -1,53 +1,54 @@
 # Part 4 - Security
 
-In the previous lab, you have packaged your Application and you are now almost ready for deployment. But first we need to make sure to not introduce any security risks to our production infrastructure with our changes!
+In the previous lab, you packaged your application and are now almost ready for deployment. But first, we need to ensure we don't introduce any security risks to our production infrastructure with our changes.
 
-After all, Nasa wouldn't launch a rocket without making sure it is safe to do so, right?
+After all, NASA wouldn't launch a rocket without ensuring its safety, right?
 
-Security is an integral part to building software. Too much is at stake, so it can not merely be an aferthought to what you do, but needs to be tightly integrated into your Software Development Lifecycle!
+Security is an integral part of software development. Too much is at stake; it cannot merely be an afterthought in what you do. Instead, it needs to be tightly integrated into your software development lifecycle!
 
-We need to be able to spot and fix vulnerabilities as soon as possible, and for this, **automation** plays a major role. Hence, enter the security stage: GitHub Actions!
+We must spot and fix vulnerabilities as soon as possible, and for this, **automation** plays a significant role. Hence, enter the security stage: GitHub Actions!
 
-In this lab, you will leverage GitHub Actions to improve security through automation by creating two new workflows:
+In this lab, you will leverage GitHub Actions to enhance security through automation by creating two new workflows:
 
-1. **Supply-Chain Security**: You will use the [**Depency Review Action**](https://github.com/actions/dependency-review-action) to make sure you are not introducing vulnerable dependencies in your pull-requests. This is important as an average of 80% of code within your project will come from 3rd Party libraries, so we have to make sure they are secure before using them!
-2. **Code-Security**: You will execute a **Static Code Analysis with CodeQL** to also make sure you are not introducing any vulnerabilities in the 20% that is still your own written code - after all, we are just rocket scientists, so we make mistakes!
+1. **Supply-chain security**: You will use the [dependency review action](https://github.com/actions/dependency-review-action) to ensure you're not introducing vulnerable dependencies in your pull requests. This is crucial since, on average, 80% of the code in your project comes from third-party libraries. We need to ensure they are secure before using them!
 
-> **Note**
-> Both of these features are part of GitHub Advanced Security - or **GHAS** for short - which offers additional security features beyond the actions we are using in this workshop. It is free for public repositories and thus can be used in this workshop! For more information, see [About GitHub Advanced Security](https://docs.github.com/en/code-security/secure-coding/about-github-advanced-security).
-
-## Preparation: Enable Dependency Graph and GitHub Advanced Security (GHAS)
-
-In order to make both features work, we first need to prepare our repository by enabling the Dependency Graph and GitHub Advanced security:
-
-![Screenshot showing the Code security and analysis tab in the Repository Settings](images/004/enable_graph_and_ghas.png)
-
-1. Go to your repository's settings
-2. Select the **Code security and analysis** tab
-3. Click **Enable** the **Dependency graph**
-4. Click **Enable** for **GitHub Advanced Security** and confirm the activation by clicking **Enable GitHub Advanced Security for this repository**
-  ![Screenshot of the GitHub Advanced Security activation confirmation dialog](images/004/confirm_ghas_activation.png)
+2. **Code security**: You will execute static code analysis with CodeQL to ensure you're not introducing any vulnerabilities in the 20% of code that you've written. After all, even rocket scientists make mistakes!
 
 > **Note**
-> You will only be able to enable GHAS in a public repository or in organizations where you have GHAS Licenses available.
+> Both of these features are part of GitHub Advanced Security (or GHAS for short), which offers additional security features beyond the actions we are using in this workshop. It's free for public repositories and can thus be used in this workshop. For more details, see [this page](https://docs.github.com/en/code-security/secure-coding/about-github-advanced-security).
 
-## 1. Add the Dependency Review Action
+## Preparation: Enable dependency graph and GitHub Advanced Security (GHAS)
 
-By enabling the Dependency Graph, we allowed GitHub to analyze the [`package.json`](../package.json) and [`package-lock.json`](../package-lock.json) files in our repository to keep track of all contained dependencies.
+To activate both features, we first need to prepare our repository by enabling the dependency graph and GitHub Advanced Security:
 
-You can check that this worked by navigating to **Insights** > **Dependency graph** in your repository:
+![Screenshot showing the code security and analysis tab in the repository settings](images/004/enable_graph_and_ghas.png)
 
-![Screenshot of the Dependency Graph](images/004/dependency_graph.png)
+1. Navigate to your repository's settings.
+2. Choose the **Code security and analysis** tab.
+3. Click **Enable** next to the **Dependency graph**.
+4. Click **Enable** for **GitHub Advanced Security** and confirm the activation by clicking **Enable GitHub Advanced Security for this repository**.
+   ![Screenshot of the GitHub Advanced Security activation confirmation dialog](images/004/confirm_ghas_activation.png)
 
-We can make use of this data with the [Dependency Review Action](https://github.com/actions/dependency-review-action), which will cross-reference new dependencies and versions with known vulnerabilities from our [GitHub Advisory Database](https://github.com/advisories).
+> **Note**
+> You can only enable GHAS in a public repository or in organizations where GHAS licenses are available.
 
-### 1.1 - Add a Dependency Review workflow
+## 1. Add the dependency review action
 
-1. Create a new workflow-file `.github/workflows/dependency-review.yml` with the following content:
+By enabling the dependency graph, we've allowed GitHub to analyze the [`package.json`](../package.json) and [`package-lock.json`](../package-lock.json) files in our repository to monitor all dependencies.
+
+You can verify its functionality by going to **Insights** > **Dependency graph** in your repository:
+
+![Screenshot of the dependency graph](images/004/dependency_graph.png)
+
+We can use this data with the [dependency review action](https://github.com/actions/dependency-review-action), which cross-references new dependencies and versions against known vulnerabilities from the [GitHub Advisory Database](https://github.com/advisories).
+
+### 1.1 - Add a dependency review workflow
+
+1. Create a new workflow file named `.github/workflows/dependency-review.yml` with the following content:
 
     ```yml
-    name: 'Dependency Review'
-    on: [pull_request]
+    name: Dependency Review
+    on: pull_request
 
     permissions:
       contents: read
@@ -57,34 +58,35 @@ We can make use of this data with the [Dependency Review Action](https://github.
       dependency-review:
         runs-on: ubuntu-latest
         steps:
-          - name: 'Checkout Repository'
+          - name: Checkout Repository
             uses: actions/checkout@v3
-          - name: 'Dependency Review'
+          - name: Dependency Review
             uses: actions/dependency-review-action@v3
             with:
               comment-summary-in-pr: true
     ```
 
-2. Commit this file to your `main` Branch
+2. Commit this file to your `main` branch.
 
 ### 1.2 - Make sure it works
 
-Now lets test if this actually works. We need to install a new dependency, so you will have to do the following actions in a **checked-out repository on your local machine or from within a GitHub Codespace**:
+Let's test if this workflow functions correctly. To do so, we will install a new dependency. Follow the steps below in a repository cloned on your local machine or from within a GitHub Codespace:
 
-1. Open up a Terminal
-2. Create a new branch `add-vulnerability`
+1. Open a terminal.
+
+2. Create a new branch named `add-vulnerability`.
 
     ```bash
     git checkout -b add-vulnerability
     ```
 
-3. Install `lodash` in version `4.17.20` which is known to be vulnerable:
+3. Install `lodash` version `4.17.20`, which is known to be vulnerable:
 
     ```bash
     npm install lodash@4.17.20
     ```
 
-4. This will adjust both, the `package.json` and the `package-lock.json` - so let's commit these changes and push our branch to GitHub:
+4. This will modify both the `package.json` and the `package-lock.json` files. Commit these changes and push the branch to GitHub:
 
     ```bash
     git add package.json package-lock.json
@@ -92,59 +94,58 @@ Now lets test if this actually works. We need to install a new dependency, so yo
     git push -u origin add-vulnerability
     ```
 
-5. Open a pull-request for your branch<br/>
-    *If you don't know how to open a pull request, you can pick your favorite way and follow allong with our [docs on Creating a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request?tool=cli)*
+5. Open a pull request for your branch.
+    *If you're unfamiliar with how to open a pull request, choose your preferred method and refer to our [documentation on creating a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request?tool=cli)*.
 
-6. By opening a pull-request, you will trigger the `Dependency Review` workflow - but it will fail due to the newly introduced vulnerability. As we have set the `comment-summary-in-pr` option to `true`, the action will conveniently comment on the pull-request with a summary of the vulnerabilities it found:
+6. By opening a pull request, you will trigger the `Dependency Review` workflow. However, it will fail due to the newly introduced vulnerability. Since we set the `comment-summary-in-pr` option to `true`, the action will conveniently comment on the pull request with a summary of the vulnerabilities it found.
     ![Screenshot of the pull request comment with the vulnerability summary](images/004/dependency_review_pr_comment.png)
-  
-    Alternatively, you can also view the summary in the workflow-run's dashboard by clicking on the **Details** link next to the failed check and then navigate to the workflows **Summary**:
+
+    Alternatively, you can also view the summary in the workflow run's dashboard. Click on the **Details** link next to the failed check, and then navigate to the workflow's **Summary**:
 
     ![Screenshot of the failed Dependency Review check](images/004/failed_dependency_review.png)
 
     ![Screenshot of the dependency review summary](images/004/dependency_review_summary.png)
 
-Inspect the Links in the summary - they will take you directly to the advisory on GitHub, where you can find more information about the vulnerability and how to fix it.
+Inspect the links in the summary. They will direct you to the advisory on GitHub, where you can find more details about the vulnerability and recommendations for remediation.
 
-**You can try to fix the vulnerability by upgrading to the patched version of lodash. However, this is not required to continue with the workshop, so you can also just leave the pull request as it is as a reference for you!**
+> **Note**
+You have the option to fix the vulnerability by upgrading to the patched version of lodash. This step is not mandatory to proceed with the workshop, so you can keep the pull request as a reference if you prefer.
 
-In the Dependency Review Action summary, you might also have seen something about licenses - if you are interested in that, you can read all about it and how to configure it in the [Dependency Review Action Readme](https://github.com/actions/dependency-review-action).
+In the Dependency Review workflow summary, there might also be mentions of licenses. If that piques your interest, you can delve deeper by reading the [dependency review action README](https://github.com/actions/dependency-review-action).
 
-## 2. Add Code Scanning with CodeQL
+## 2. Add code scanning with CodeQL
 
-Now let's add a second security feature to our repository: CodeQL. CodeQL is GitHub's Static Code Analysis tool - meaning can automatically scan your source code for possible insecure code snippets and vulnerabilities.
+Now, let's integrate another security feature into our repository: CodeQL. CodeQL is GitHub's static code analysis tool. It can automatically scan your source code for vulnerabilities.
 
-It does so by first loading your code into a database and then running a set of pre-defined queries against it. These queries are written in a custom query language called CodeQL and are stored in the official [CodeQL repository](https://github.com/github/codeql). This also means that, whenever new queries are added, you can automatically profit from them.
+It achieves this by first loading your code into a database and then executing a set of predefined queries against that database. These queries, written in a custom language called QL, are stored in the official [CodeQL repository](https://github.com/github/codeql). Therefore, when new queries are developed and added to this repository, they will automatically become available to you.
 
-As **Actions** speak more than thousand words (pun intended), let's just go ahead and use it!
+However, actions speak louder than words (pun intended), so let's set up a workflow that performs code scanning with CodeQL.
 
 ### 2.1 - Add a CodeQL workflow
 
-In you repository, go again to **Actions > Setup new workflows**, scroll down to the **Security** Section until you see the **CodeQL Analysis** workflow and click on **Configure**:
+In your repository, navigate to **Actions**, then click **New workflow**. Scroll down to the **Security** section, find the **CodeQL Analysis** workflow, and click on **Configure**:
 
 ![Screenshot of the CodeQL Analysis workflow](images/004/configure_codeql_analysis.png)
 
-Let's examine the `.github/workflows/codeql.yml` file that is to be created and make some changes before we commit it.
+Examine the `.github/workflows/codeql.yml` file that is set to be created. Before committing it, let's understand and possibly modify some of its components.
 
-1. We have several triggers in the `on:`-section, and you already know the `push` and the `pull-request` trigger from previous workflows. However, the `schedule` trigger is new:
+1. The `on:` section defines several triggers. You're already familiar with the `push` and `pull_request` triggers from earlier workflows. The `schedule` trigger, however, might be new to you:
 
     ```yml
     on:
       push:
-        branches: [ "main" ]
+        branches: [ main ]
       pull_request:
-        branches: [ "main" ]
+        branches: [ main ]
       schedule:
         - cron: '23 18 * * 1'
     ```
 
-    As the name intends, this will trigger this workflow on a schedule, so recurringly at a specified time or interval. The `cron`-expression is a way to define the schedule in a human-readable way. In this case, it will run every Monday at 6:23 PM. You can read more about the syntax in the [GitHub Docs](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule).
+    As the name suggests, this trigger will initiate the workflow on a schedule, meaning it will execute at specified times or intervals. The `cron` expression defines this schedule in a format that's easy to understand. In this configuration, it's set to run every Monday at 6:23 PM. To gain a deeper understanding of the syntax, refer to the [GitHub Docs](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule).
 
-    Executing a Code-Scan once a week makes perfect sense, given that new queries might have been added to the CodeQL repositories which might show us vulnerabilities that were sleeping in our code.
+    Running a code scan once a week is advisable since new queries might have been added to the CodeQL repositories, potentially revealing vulnerabilities that were previously undetected in our code.
 
-    However, as this is a non-production application, and to save up on your precious Actions minutes, you can also just remove this trigger.
-
-2. In the `strategy` section, we have another `matrix` defined, a keyword you already know:
+2. The `strategy` section introduces another `matrix`, a concept you're already familiar with:
 
      ```yml
     strategy:
@@ -153,11 +154,11 @@ Let's examine the `.github/workflows/codeql.yml` file that is to be created and 
         language: [ 'javascript' ]
     ```
 
-    But what about the `fail-fast`? On default, if one job of a matrix fails, the other jobs will be cancelled immediately to save Actions minutes. By setting `fail-fast` to `false`, we deactivate this behavior, so all jobs of the matrix will run until the end, even if one or more of them fail.
+    But what about `fail-fast`? By default, if one job within a matrix fails, the remaining jobs are halted immediately to save on Action minutes. By setting `fail-fast` to `false`, we override this default behavior. This ensures all jobs within the matrix complete their execution, regardless of the outcome of individual jobs.
 
-    This is useful for projects where you have more than one language. It's not the case here, but it also doesn't hurt to leave it in.
+    This configuration is especially useful for projects that use multiple languages. While it isn't the case here, it doesn't harm to retain this setup.
 
-3. In the steps section, you find the `Initialize CodeQL` step, which will download the CodeQL CLI and initialize the CodeQL database by loading the code of our repository into it.
+3. The steps section includes the `Initialize CodeQL` step. This step downloads the CodeQL CLI and initializes the CodeQL database by populating it with the code from our repository.
 
     ```yml
     - name: Initialize CodeQL
@@ -166,14 +167,14 @@ Let's examine the `.github/workflows/codeql.yml` file that is to be created and 
         languages: ${{ matrix.language }}
     ```
 
-4. The `Autobuild` step is actually only required for compiled languages like Java, C++, Go, as CodeQL needs the compilation scan to deliver better scan results. **However, as this is a JavaScript / Typescript app, it is not needed and you can safely remove that step!**
+4. The `Autobuild` step is specifically beneficial for compiled languages like Java, C++, and Go. For such languages, CodeQL observes how the application is compiled to yield more accurate scan results. However, given that our application is built with JavaScript/Typescript, this step is unnecessary, so you can safely omit it in your workflow.
 
     ```yml
     - name: Autobuild
       uses: github/codeql-action/autobuild@v2
     ```
 
-5. The `Perform CodeQL Analysis` step will then finally run the CodeQL queries against the database with our code and upload the results back to GitHub for you to explore.
+5. The `Perform CodeQL Analysis` step runs the CodeQL queries against the database containing our code. Once completed, it uploads the results to GitHub, enabling you to examine them.
 
     ```yml
     - name: Perform CodeQL Analysis
@@ -182,19 +183,19 @@ Let's examine the `.github/workflows/codeql.yml` file that is to be created and 
         category: "/language:${{matrix.language}}"
     ```
 
-6. Commit this file to a new branch `add-codeql` and open a pull request to merge it into `main`.
+6. Save these changes and commit this file to a new branch named `add-codeql`. Following this, open a pull request targeting the `main` branch.
 
 <details>
-<summary>The final version of your codeql.yml should look like this</summary>
+<summary>The final version of your `codeql.yml` should look like this:</summary>
 
 ```yml
 name: "CodeQL"
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
 
 jobs:
   analyze:
@@ -227,23 +228,24 @@ jobs:
 
 </details>
 
-By committing and opening the pull-request, you should have triggered the CodeQL workflow run. It will run for a bit, so you can go into the action logs and observe what is is doing.
+By committing and opening the pull request, you the CodeQL workflow will be automatically triggered. It will run for a bit, so you can go into the workflow run logs and observe what it's doing.
 
 ### 2.2 Add a vulnerability
 
-Luckily, we don't seem to have a vulnerability just yet in our code. 😮‍💨
-Let's change that to see how CodeQL works and notifies us in a pull-request before it's too late.
+Luckily, we don't seem to have a vulnerability in our code just yet. 😮‍💨
 
-Conduct the following actions in a **checked-out repository on your local machine or from within a GitHub Codespace**:
+Let's introduce one to see how CodeQL works and notifies us in a pull request, before it manages to land in the `main` branch.
 
-1. Open a Terminal and checkout the `add-codeql` branch we have just created:
+Conduct the following actions in a repository cloned on your local machine or from within a GitHub Codespace:
+
+1. Open a terminal and checkout the `add-codeql` branch we just created:
 
     ```bash
     git fetch --all
     git checkout add-codeql
     ```
 
-2. Navigate to the file [`src/components/OctoLink.tsx`](../src/components/OctoLink.tsx) and look at the function `sanitizeUrl` on Line 10:
+2. Navigate to the file [`src/components/OctoLink.tsx`](../src/components/OctoLink.tsx) and look at the function `sanitizeUrl` on line 10:
 
     ```tsx
     function sanitizeUrl(url: string) {
@@ -256,7 +258,7 @@ Conduct the following actions in a **checked-out repository on your local machin
     }
     ```
 
-3. There is some outcommented code which is, in fact, insecure. Just what we wanted - go ahead and remove the comments (by removing the `//`-characters in front):
+3. There is some commented-out code which is, in fact, insecure. Go ahead and remove the comments (by removing the `//` characters in front):
 
     ```tsx
     function sanitizeUrl(url: string) {
@@ -273,7 +275,7 @@ Conduct the following actions in a **checked-out repository on your local machin
 
    ```bash
    git add .
-   git commit -m "Adds security vulnerabilyt"
+   git commit -m "Add security vulnerability"
    git push
    ```
 
@@ -281,28 +283,29 @@ This will trigger the Code scanning workflow in our pull request again.
 
 ### 2.3 - Check the code scanning results
 
-After the Code scanning workflow has finished, navigate into the pull request and inspect the results.
+After the code scanning workflow has finished, navigate to the pull request and inspect the results.
 
-1. As expected, it now found the vulnerability we have just introduced. Let's quickly click on *Details* to find out more.
+1. As expected, it now found the vulnerability we just introduced. Let's quickly click on *
+**Details** to find out more.
 
-    ![Screenshot of some status checks of a GitHub pull request with a failed Code scanning job](images/004/failed_codeql_run.png)
+    ![Screenshot of some status checks of a GitHub pull request with a failed code scanning job](images/004/failed_codeql_run.png)
 
-2. This will bring us to the **Checks** tab of the pull-request, telling us we have a **Incomplete URL schema check** vulnerability with a **High** Severity. Let's click on *Details* again to find out more.
+2. This will bring us to the **Checks** tab of the pull request, informing us that we have an incomplete URL schema check vulnerability with high severity. Click on **Details** again to learn more.
 
     ![Screenshot of a code scanning job summary page](images/004/codeql_workflow_summary.png)
 
-3. This brings us straight to the Code scanning alert page of the repository's **Security** tab. Here, we find all the details of vulnerability we just discovered: where it is in our code, what the vulnerability is, and even all about how to fix it (after clicking on **Show more**).
+3. This directs us to the **Code scanning** tab under the repository's **Security** tab. Here, we find all the details of the vulnerability we've discovered: its location in our code, a description of the issue, and even guidance on how to fix it (after clicking on **Show more**).
 
-    ![Screenshot of the Code scanning alert page ](images/004/vulnerability_result_page.png)
+    ![Screenshot of the Code scanning alert page](images/004/vulnerability_result_page.png)
 
-4. Okay, so it's time to fix this! You should have everything you need to do so yourself without further explanation. But if you need a hint, you can click on the button below to see the solution.
+4. Okay, so it's time to fix this! You should have all the information you need to address the issue on your own. However, if you need a hint, you can click on the button below to reveal the solution.
 
    <details>
    <summary>
    How to fix the vulnerability
    </summary>
 
-   Change Line 10 in the file [`src/components/OctoLink.tsx`](../src/components/OctoLink.tsx#10) to the following and commit and push your changes afterwards:
+   Modify line 10 in the file [`src/components/OctoLink.tsx`](../src/components/OctoLink.tsx#10) to the following, then commit and push your changes:
 
    ```tsx
     if (u.startsWith("javascript:") || u.startsWith("data:") || u.startsWith("vbscript:")) {
@@ -312,29 +315,31 @@ After the Code scanning workflow has finished, navigate into the pull request an
 
    </details>
 
-   After you made the changes and the CodeQL-Workflow ran again, the vulnerabilty will be gone and all checks on the pull request should pass.
+  After you've made the changes and the CodeQL workflow runs again, the vulnerability will be resolved, and all checks on the pull request should pass.
 
-   ![Screenshot of a sucessfull check of CodeQL in a pull requests](images/004/code_scanning_success.png)
+   ![Screenshot of a successful check of CodeQL in a pull request](images/004/code_scanning_success.png)
 
-## (Optional) 3. Enforce both workflows to succeed before being able to merge a Pull Request
+## (Optional) 3. Enforce both workflows to succeed before being able to merge a pull request
 
-The same as in [Lab 2 - Step 3.4 (optional) Enforce a certain coverage threshold with Branch Protection Rules](002-basics-of-ci-with-actions.md#34-optional---enforce-a-certain-coverage-threshold-with-branch-proection-rules), you can enforce that the two workflows need to succeed before being allowed to merge a Pull Request. This is done by adding them to the `Required Status checks` of your Branch Protection rule for the `main` Branch.
+Similar to [step 3.6 of lab 2](002-basics-of-ci-with-actions.md#34-optional---enforce-a-certain-coverage-threshold-with-branch-protection-rules), you can enforce that both workflows need to succeed before being allowed to merge a pull request. This is achieved by adding them to the required status checks of your branch protection rule for the `main` branch.
 
-This ensures that no one will be able to add any new vulnerabilities to your `main` Branch.
+This ensures that no one can introduce any new vulnerabilities to your `main` branch.
 
 ## Conclusion
 
-And that's it! By working with GitHub Advanced security and Actions, we immediately found vulnerabilities both in our code and our supply chain, and were able to quickly remediate them - even long before they could become an actual problem!
+And that's it! By working with GitHub Advanced Security and Actions, we immediately identified vulnerabilities both in our code and our supply chain, and were able to promptly remediate them, well before they could pose an actual threat.
 
-In this lab you have learned how to:
+In this lab, you learned how to:
 
-- 👏 Activate the Dependency Graph and GitHub Advanced Security in your project
-- 👏 Use the Dependency Review Action to scan your dependencies for vulnerabilities
-- 👏 Use the CodeQL Action to scan your code for vulnerabilities
+- 👏 Activate the dependency graph and GitHub Advanced Security in your project
+- 👏 Use the dependency review action to scan your dependencies for vulnerabilities
+- 👏 Use the CodeQL action to scan your code for vulnerabilities
 
 > **Note**
-> What you learned in this lab was only the beginning of how GitHub Advanved Security can help you to ensure safety of your code. If you want to know more, you can read through the [Addendum - GitHub Advanced Security](./addendum-004-github-advanced-security.md)!
+> What you learned in this lab is just the beginning of how GitHub Advanced Security can assist you in ensuring the safety of your code. To delve deeper, feel free to read through the [Addendum - GitHub Advanced Security](./addendum-004-github-advanced-security.md)!
 
 ---
 
-Next : [Launching the rocket - deployment!](/docs/005-deployment.md)
+Next:
+
+- **[Deployment](/docs/005-deployment.md)**
