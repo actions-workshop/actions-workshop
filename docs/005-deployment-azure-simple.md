@@ -1,128 +1,71 @@
-# Part 5 - Deployment
+# Part 5 - Deployment: Azure Simple
 
 In a previous lab, you used GitHub Actions to package an application into a Docker image and publish that package to the GitHub Container registry. The next step in a classic continuous delivery process is to **deploy** the application.
 
-In this lab, you will extend the workflow to deploy the container image to [Azure Container Apps](https://azure.microsoft.com/en-gb/products/container-apps/), a managed Kubernetes service in Azure.
+In this lab, you will extend the workflow to deploy the container image to [Azure Web Apps](https://azure.microsoft.com/en-us/products/app-service/web), a managed web application service in Azure that also supports container deployment.
 
-Before deploying, you will learn how to authenticate to Azure using OIDC (OpenID Connect), an open and secure standard for authentication. OIDC eliminates the need to store secrets or credentials while still allowing secure authentication to Azure. OIDC can be used to [authenticate with many cloud providers](https://docs.github.com/en/enterprise-cloud@latest/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect), such as AWS, GCP, and others.
+You will learn how to easily authenticate against Azure using an action, use Actions variables to define configuration values for your actions, and establish manual deployment approvals for your environments.
 
-## 1 - Create a federated credential
+> **Note**
+> The Azure account you will use in this workshop is provided for you, so there's no need to create one yourself. Access is granted through organization secrets, which you will learn about in the first step of this lab.
 
-In this step, you will need to log into your Azure account. You will then:
+## 1 - Actions variables and secrets
 
-- Create a new service principal (SP).
-- Create a federated credential to authenticate GitHub Actions workflows.
-- Assign the `Contributor` role to the SP for a subscription.
-- Record the SP information in your GitHub repository.
+### 1.1 Create a new Actions variable
 
-### 1.1 Create an Azure service principal (SP)
+You have already learned how to utilize variables within a workflow. However, up to now, you have only used variables provided by GitHub itself. Now, let's learn how to add your own variables (and secrets) to define repository-specific configurations and other values that you might not want to hard-code into your workflow files.
 
-> **Note**: To perform this step, you will require at least `Contributor` access to your Azure Active Directory.
+1. Navigate to your repository's **Settings**, expand **Secrets and variables**, and select **Actions**.
+    ![Navigate to Actions secrets](./images/005/issue-ops-005-navigate-secrets.png)
 
-You will now create a service principal (SP) or app registration. This is like a "service account" to which you can assign roles and permissions.
+2. Pause here and observe that there are already some organization secrets defined: `AZ_CLIENT_ID`, `AZ_SECRET`, `AZ_SUBSCRIPTION_ID`, and `AZ_TENANT_ID`. These secrets were created for you by your organization's administrator, allowing you to authenticate against Azure with a service principal (also known as "machine user") to execute your deployment. You can (and will) access these secrets from your workflow files under the `secrets` namespace (e.g., `secrets.AZ_CLIENT_ID`). Further details on the scopes of secrets and variables are provided below.
 
-1. Open the [Azure portal](https://portal.azure.com) in a browser and log in.
-1. In the search bar at the top of the page, enter `active directory`, and then click on **Azure Active Directory**:
+3. Navigate to the **Variables** tab  and click on **New repository variable**.
 
-    ![Navigate to Azure Active Directory](images/005/navigate-active-directory.png)
+    ![Click on New repository variable](images/005/issue-ops-006-navigate-variables.png)
 
-1. On the left menu, click on **App registrations**. Click on **New registration** to create a new SP:
+4. Name the variable `AZ_APP_NAME` and provide a value of your choice, preferably your repository's name (since the app name needs to be unique across all Azure web services, choose something distinctive). Click on **Add variable** once finished.
+    ![Create a new variable](./images/005/issue-ops-007-create-az-app-name.png)
 
-    ![Create a new app registration](images/005/new-app-registration.png)
+Now, you've created a variable that will be accessible from all workflows within this repository as `${{ vars.APP_NAME }}`. We will make use of this in our deployment workflow.
 
-1. Enter a name for the SP, leave the rest of the fields as default, and click **Register**:
+<details>
+  <summary>(optional) Understand Azure and the provided secrets and variables</summary>
 
-    ![Register the new App](images/005/app-registration-details.png)
+- `AZ_TENANT_ID`: An Azure tenant essentially represents the Azure account itself. This ID indicates the specific Azure account we will be logging into and deploying our app to later on.
+- `AZ_SUBSCRIPTION_ID`: In Azure, a subscription functions as a billing unit, meaning that all associated resources will be billed based on the information linked to the subscription. Everything deployed to Azure must exist within a subscription, so you can view it as a top-level organizational mechanism.
+- `AZ_CLIENT_ID` and `AZ_SECRET`: These are the credentials for the machine user (or "service principal" in Azure terminology) used for automated deployments. The "client ID" functions as the username, while the "secret" is the password. While there are other authentication methods supported by GitHub (e.g., passwordless through OIDC), they are beyond the scope of this workshop.
+</details>
 
-### 1.2 Create federated credentials for Actions from your repository
+### 1.2 Scopes of secrets and variables
 
-You will now create a federated (OIDC) credential. This credential will be authenticated only if the request comes from your repository and from an environment named `staging`. No other environments will be authenticated.
+Secrets and variables can be defined across three distinct scopes:
 
-1. Click on the SP to navigate to its settings. Click on **Certificates & secrets**, then on **Federated credentials**, and finally, click the **Add credential** button:
+1. **Environment**: Secrets and variables within this scope are only accessible for jobs that specify an `environment`. Environments can be protected, making this scope an excellent choice for restricting the use of these variables. Additionally, it can make workflows versatile for various environments like deployment targets by reusing identical variable names. You will delve deeper into environments in this lab.
 
-    ![Add a new credential](images/005/add-credential.png)
+2. **Repository**: Secrets and variables at this scope are available in all workflows of the repository. They are suitable for general secrets and variables you want to use or reuse across the repository.
 
-1. In **Federated credential scenario**, select **GitHub Actions deploying Azure resources**.
-1. In **Organization**, enter your GitHub organization name, or if you are using a personal account, enter your handle (your GitHub username).
-1. In **Repository**, enter the name of your repository.
-1. In **Entity type**, select **Environment**.
-1. Enter `staging` for the **GitHub environment name**.
-1. In the **Credential details** section, enter `Staging` as the **Name**.
-1. Click **Add** to create the credential:
+3. **Organization**: Secrets and variables within this scope can be accessed in all workflows across all repositories of the organization. This is especially beneficial for defining secrets and variables used across multiple repositories, such as a shared deployment account, as seen in this workshop.
 
-    ![Add a federated credential](images/005/federated-creds.png)
+Once a job starts, all the scopes merge into the `secrets` namespace for secrets and the `vars` namespace for variables.
 
-1. Now, click on **Overview** and write down the **Application (client) ID** and **Directory (tenant) ID** values:
-
-    ![Record client and tenant IDs](images/005/app-registration-overview.png)
-
-### 1.3 Assign roles to the SP
-
-Now that you have an SP that can be used by Actions in your repository, targeting the `staging` environment, you must grant the SP permissions to create resources and resource groups in a subscription. For this workshop, you will assign the `Contributor` role to the SP.
-
-1. In the search bar at the top of the page, enter `sub` and click on **Subscriptions**:
-
-    ![Navigate to subscriptions](images/005/navigate-subscriptions.png)
-
-1. Click on the subscription to which you want to grant the SP permissions.
-1. Click on **Access control (IAM)**, then click **Add** at the top menu and select **Add role assignment**:
-
-    ![Add role assignment](images/005/add-role-assignment.png)
-
-1. In the list of roles, select **Contributor** and click **Next**:
-
-    ![Select the Contributor role](images/005/select-contributor.png)
-
-1. Click **Select members** and type in the name of your SP. Click on the SP in the list and then click **Select**:
-
-    ![Select the SP](images/005/select-sp.png)
-
-1. In the overview, verify that everything is correct. Record the subscription ID for later and then click **Review + assign**:
-
-    ![Complete role assignment](images/005/complete-role-assignment.png)
-
-1. Confirm the role assignment is completed successfully.
-
-### 1.4 Record IDs as secrets in your repository
-
-You now have an SP that will enable your workflows to create, update, or delete resources in a subscription in Azure. Next, you will record the IDs required for the OIDC to function during a workflow, specifically the tenant ID, subscription ID, and the client ID (of the SP). Note that we are not storing any passwords or tokens!
-
-Although the IDs are not strictly "secrets" as they cannot be used without a token or client secret, we will store them as secrets in the repository for convenience.
-
-1. Navigate to your repository and click on the **Settings** tab. On the left menu, expand **Secrets** and click **Actions**. Then, click on **New repository secret**:
-
-    ![Create a new repo secret](images/005/new-secret.png)
-
-1. Enter the following secrets using the values you recorded earlier:
-
-    | Name                  | Value               |
-    | --------------------- | ------------------- |
-    | `ARM_CLIENT_ID`       | The SP client ID    |
-    | `ARM_SUBSCRIPTION_ID` | The subscription ID |
-    | `ARM_TENANT_ID`       | The tenant ID       |
-
-    ![Add the secret](images/005/add-secret.png)
-
-1. Upon completion, your secrets should look like the following:
-
-    ![Secrets in the repo](images/005/repo-secrets.png)
+If two variables from different scopes share the same name, the one from the scope with the higher precedence is used. The precedence order is: **Environment** > **Repository** > **Organization**.
+For instance, if you have a secret at the organization level named `SECRET` with the value `Organization`, and another with the same name in your repository with the value `Repository`, using `${{ secrets.SECRET }}` in your workflow will yield the value `Repository`.
 
 ## 2 - Extend the workflow to deploy to staging
 
-Time to put everything into action with a real deployment. In previous labs, you built the application and packaged it into a container image, which was then published to the GitHub Container Registry. To launch the application, you need to run this container image. Multiple methods exist to achieve this, such as through Azure Container Instances, Azure Web Apps for Linux, or within a Kubernetes cluster like Azure Kubernetes Services (AKS). Additionally, Azure offers a  managed Kubernetes service known as Azure Container Apps, capable of running container instances. For this workshop, you will deploy the container image to Azure Container Apps.
+Time to put everything into action with a real deployment. In previous labs, you built the application and packaged it into a container image, which was then published to the GitHub Container registry. To launch the application, you need to run this container image. Multiple methods exist to achieve this, such as through Azure Container Instances, Azure Web Apps for Linux, or within a Kubernetes cluster like Azure Kubernetes Services (AKS). Additionally, Azure offers a managed web app service known as Azure Web Apps, capable of running container instances. For this workshop, you will deploy the container image to Azure Web Apps.
 
-While it's possible to navigate to the Azure portal and create a container app, directing it to your packages in GitHub, a recommended best practice is to describe the resources using code, adopting Infrastructure as Code (IaC) principles. This project comes equipped with [Bicep](https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview?tabs=bicep) scripts that detail the entire infrastructure. However, alternatives like Terraform can also be used for that purpose.
+A recommended best practice for deployments involves defining resources via code (Infrastructure as Code or IaC). This project comes equipped with [Bicep](https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview?tabs=bicep) scripts that detail the entire infrastructure. However, alternatives like Terraform can also be used for that purpose.
 
 ### 2.1 Utilizing Infrastructure as Code (IaC)
 
-The Bicep files for deployment are in the [`/infra/container-app`](../infra/container-app/) folder in the repository, consisting of four distinct files:
+The Bicep files for deployment are in the [`/infra/web-app`](../infra/web-app/) folder in the repository, consisting of two distinct files:
 
-| File                              | Description                                                                                                         |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `container-app-environment.bicep` | Specifies the compute SKU for the container application                                                             |
-| `container-app.bicep`             | Specifies the app itself, including which image(s) to run and whether or not the application is exposed externally  |
-| `law.bicep`                       | Log analytics workspace for diagnostics                                                                             |
-| `main.bicep`                      | The main infrastructure file, which invokes the other files to create the full environment                          |
+| File            | Description                                                                                                                   |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `main.bicep`    | The main infrastructure file, which creates an Azure resource group and invokes the other files to create the full environment |
+| `web-app.bicep` | Specifies the app itself, as a web app for containers                                                                          |
 
 To set up the necessary infrastructure services and deploy the application, you will use the Azure command-line interface (`az cli`). Soon, you will integrate this step into the workflow. Before that, though, it's essential to make the package publicly accessible.
 
@@ -144,7 +87,7 @@ While it's generally not recommended to make container images public (unless you
 
     ![Confirm your changes](images/005/change-visibility.png)
 
-### 2.3 Integrate the deployment step into the workflow
+### 2.3 Add the deployment step to workflow
 
 It's now time to adjust the workflow, integrating automation for the application's deployment.
 
@@ -153,41 +96,33 @@ Open the `node.js.yml` file. Right after the `package-and-publish` job, insert t
 ```yml
   staging:
     name: Deploy to Staging
-    needs: [ package-and-publish ]
+    needs: [package-and-publish]
     runs-on: ubuntu-latest
+    ## Only deploy after merges to the main branch, not on every PR
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: read
-      id-token: write
     environment:
       name: staging
-      url: "https://${{ steps.deploy.outputs.fqdn }}"
+      url: "${{ steps.deploy.outputs.url }}"
 
     steps:
       - uses: actions/checkout@v2
 
-      - name: Log into Azure using OIDC
+      - name: Log in to Azure using credentials
         uses: azure/login@v1
         with:
-          client-id: ${{ secrets.ARM_CLIENT_ID }}
-          tenant-id: ${{ secrets.ARM_TENANT_ID }}
-          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          creds: '{"clientId":"${{ secrets.AZ_CLIENT_ID }}","clientSecret":"${{ secrets.AZ_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZ_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.AZ_TENANT_ID }}"}'
 
       - name: Deploy resources
         uses: azure/arm-deploy@v1
         id: deploy
         with:
           scope: subscription
-          region: eastus
-          template: ./infra/container-app/main.bicep
-          parameters: "containerImage=${{ needs.package-and-publish.outputs.container }} env=staging"
-```
-
-Keep in mind that you must set [explicit permissions](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token) for the `GITHUB_TOKEN`. This is because the `id-token: write` permission is necessary to request the OIDC JWT ID token.
-
-```yml
-    permissions:
-      id-token: write
-      contents: read
+          region: westeurope
+          deploymentName: ${{ vars.APP_NAME }}-deployment
+          template: ./infra/web-app/main.bicep
+          parameters: "containerImage=${{ needs.package-and-publish.outputs.container }} actor=${{ github.actor }} appName=aw-${{ vars.APP_NAME }} repository=${{ github.repository }}"
 ```
 
 Finally, you must include an [`output`](https://docs.github.com/en/actions/using-jobs/defining-outputs-for-jobs) in your `package-and-publish` job to retrieve the container image name from the registry. This will be utilized during the Azure deployment to configure the container hosting.
@@ -195,7 +130,7 @@ Finally, you must include an [`output`](https://docs.github.com/en/actions/using
 ```yml
      runs-on: ubuntu-latest
      outputs:
-      container: ${{ steps.meta.outputs.tags }}
+       container: ${{ steps.meta.outputs.tags }}
 ```
 
 <details>
@@ -206,9 +141,9 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
@@ -218,18 +153,18 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 16.x
-        cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
-    - name: 'Report Coverage'
-      if: always()
-      uses: davelosert/vitest-coverage-report-action@v2
+      - uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: "npm"
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: npm test
+      - name: "Report Coverage"
+        if: always()
+        uses: davelosert/vitest-coverage-report-action@v2
 
   package-and-publish:
     needs:
@@ -275,44 +210,44 @@ jobs:
 
   staging:
     name: Deploy to Staging
-    needs: [ package-and-publish ]
+    needs: [package-and-publish]
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: read
       id-token: write
     environment:
       name: staging
-      url: "https://${{ steps.deploy.outputs.fqdn }}"
+      url: "${{ steps.deploy.outputs.url }}"
 
     steps:
       - uses: actions/checkout@v2
 
-      - name: Log into Azure using OIDC
+      - name: Log in to Azure using OIDC
         uses: azure/login@v1
         with:
-          client-id: ${{ secrets.CLIENT_ID }}
-          tenant-id: ${{ secrets.TENANT_ID }}
-          subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
+          creds: '{"clientId":"${{ secrets.AZ_CLIENT_ID }}","clientSecret":"${{ secrets.AZ_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZ_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.AZ_TENANT_ID }}"}'
 
       - name: Deploy resources
         uses: azure/arm-deploy@v1
         id: deploy
         with:
           scope: subscription
-          region: eastus
-          template: ./infra/container-app/main.bicep
-          parameters: "containerImage=${{ needs.package-and-publish.outputs.container }} env=staging"
+          region: westeurope
+          deploymentName: ${{ vars.APP_NAME }}-deployment
+          template: ./infra/main.bicep
+          parameters: "containerImage=${{ needs.package-and-publish.outputs.container }} actor=${{ github.actor }} appName=aw-${{ vars.APP_NAME }} repository=${{ github.repository }}"
 ```
 
 </details>
 
-The new job performs the following:
+The new job performs the following tasks:
 
-- Targets an environment named `staging`. This is crucial as the federated (OIDC) credential created earlier will only authorize this workflow if the `environment` matches.
-- Determines the URL of the environment by examining the outputs of the `Deploy resources` step, which, in turn, reads the output parameter of the Bicep file.
-- Checks out the code to gain access to the Infrastructure as Code files.
-- Logs into Azure using the IDs saved as secrets - no password required!
-- Invokes the `azure/arm-deploy` Action to deploy the application to Azure, supplying the region, main template, and additional parameters.
+- Targets an environment named `staging`. This approach simplifies the process of understanding what is deployed and where. It also provides a direct link to the target within GitHub.
+- Determines the URL of the environment by examining the outputs from the `Deploy resources` step. This step reads the output parameter of the Bicep file.
+- Checks out the code to access the Infrastructure as Code files.
+- Logs into Azure using the provided secrets from your organization.
+- Invokes the `azure/arm-deploy` action to deploy the application to Azure. This is done by passing in the main template and additional parameters, including the `appName` you provided as an Actions variable.
 
 Commit the file changes to trigger the workflow to run.
 
@@ -322,13 +257,13 @@ Commit the file changes to trigger the workflow to run.
 
     ![Deployment success](images/005/deploy-success.png)
 
-1. Click on the link to open the application running in Azure!
+2. Click on the link to open the application running in Azure!
 
     ![Running app](images/005/running-app.png)
 
 ## 3 - Set up required approval for the staging environment
 
-Now that the deployment is working, you might want to introduce a manual approval process.
+Now that the deployment is functioning, you might want to introduce a manual approval process.
 
 1. Navigate to your repository **Settings**, then click on **Environments**, then select **staging**:
 
@@ -339,25 +274,16 @@ Now that the deployment is working, you might want to introduce a manual approva
 
     ![Configure staging](images/005/approvers.png)
 
-4. (Optional) Explore other environment options such as **Wait timer** and **Deployment branches**. The latter setting allows you to specify which branches can deploy to this environment.
+4. (Optional) Explore other environment options such as **Wait timers** and **Deployment branches**. The latter setting allows you to specify which branches can deploy to this environment.
 5. The next time you push code, the workflow will pause at the **Deploy to Staging** job and wait for manual approval before executing the subsequent job steps.
-
-## Cleaning Up
-
-To remove the resources in Azure created during this lab, follow the steps below:
-
-1. Navigate to the Azure portal.
-2. Click on **Azure Active Directory** and search for the service principal you created, then delete it.
-3. Locate the resource group, likely named something akin to `rg-octocollector-staging`, by clicking on **Resource groups**.
-4. Confirm that this is the resource group containing your container app.
-5. If everything looks correct, proceed to delete the resource group.
 
 ## Conclusion
 
-In this lab, you have learned how to:
+In this lab you learned:
 
-- 👏 Set up secure, secret-less authentication to Azure via OIDC.
+- 👏 Utilize [Actions secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets) and [Actions variables](https://docs.github.com/en/actions/learn-github-actions/variables) to store sensitive information and/or configuration values, and understand their scopes.
 - 👏 Employ Infrastructure as Code to simplify deployments.
+- 👏 Use Actions to log into and deploy applications to Azure.
 - 👏 Set up an environment and designate approvers for best deployment practices.
 
 This marks the conclusion of our workshop. We hope you found it enlightening and had a ton of fun along the way!

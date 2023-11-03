@@ -1,4 +1,4 @@
-# Part 5 - Deployment
+# Part 5 - Deployment: Azure IssueOps
 
 In a previous lab, you used GitHub Actions to package an application into a Docker image and publish that package to the GitHub Container registry. The next step in a classic continuous delivery process is to **deploy** the application.
 
@@ -58,6 +58,7 @@ You have already learned how to utilize variables within a workflow. However, up
 - `AZ_SUBSCRIPTION_ID`: In Azure, a subscription functions as a billing unit, meaning that all associated resources will be billed based on the information linked to the subscription. Everything deployed to Azure must exist within a subscription, so you can view it as a top-level organizational mechanism.
 - `AZ_CLIENT_ID`: The "client ID" is akin to the username of the machine user granted access through the OIDC configuration. There are other authentication methods (e.g., using certificates or passwords) supported by GitHub, but they're outside the scope of this workshop.
 - `AZ_RESOURCE_GROUP`: A resource group in Azure is a container for various services. It allows you to group together related services and also to set permissions specific to that resource group for service principals. For instance, in this lab, you will only have access to the resource group specifically created for you and provided as a variable.
+
 </details>
 
 ### 1.3 Scopes of secrets and variables
