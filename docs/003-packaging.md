@@ -1,18 +1,18 @@
 # Part 3 - Packaging
 
-In the previous lab, you have use GitHub Actions to create a Continuous Integration (CI) workflow. The next step in a classical **Continous Delivery Process** is to **package and release** your application.
+In the previous lab, you used GitHub Actions to create a continuous integration (CI) workflow. The next step in a classical continuous delivery process is to **package and release** your application.
 
-In this lab you will extend the workflow you have created to package the application as a Container Image and publish it inside GitHub Container Registry.
+In this lab, you will extend the workflow you created to package the application as a container image and publish it to the GitHub Container Registry.
 
-Optionally, you can then **deploy** the application in an environment of your choice, for example Azure Kubernetes Service (AKS). As the deployment is highly individual to your specific requirements, we only give guidance but do not have concrete examples.
+Optionally, you can then deploy the application to an environment of your choice, for example, Azure Kubernetes Service (AKS). As the deployment is highly individual to your specific requirements, we provide only guidance and do not offer concrete examples.
 
 ## 1 - Using the visualization graph
 
-Every workflow run generates a real-time graph that illustrates the run progress. You can use this graph to monitor and debug workflows. The graph displays each job in the workflow. An icon to the left of the job name indicates the status of the job. Lines between jobs indicate dependencies.
+Every workflow run generates a real-time graph that illustrates the run progress. You can use this graph to monitor and debug workflows. The graph displays each job in the workflow. An icon to the left of the job name indicates the status of the job. Lines between jobs represent dependencies.
 
 ## 2 - Dependent jobs
 
-By default, the jobs in your workflow all run in parallel at the same time. So if you have a job that must only run after another job has been completed, you can use the `needs` keyword to create this dependency. If one of the jobs fails, all dependent jobs are skipped; however, if you need the jobs to continue, you can define this using the if conditional statement. In this example, the build, and publish-container jobs run in series, with publish-container dependent on the successful completion of the job that precedes it:
+By default, the jobs in your workflow run in parallel at the same time. If you have a job that must run only after another job has completed, you can use the `needs` keyword to create this dependency. If one of the jobs fails, all dependent jobs are skipped; however, if you want the jobs to continue, you can define this using the `if` conditional statement. In the following example, the `build` and `publish-container` jobs run in series, with `publish-container` dependent on the successful completion of `build`:
 
 ```yml
 jobs:
@@ -20,56 +20,55 @@ jobs:
     needs: setup
     runs-on: ubuntu-latest
     steps:
-      # Build node application
+      # Build Node application
       - ...
         ...
   publish-container:
-    # Depends of build
     needs: build
     runs-on: ubuntu-latest
     steps:
-      # Build and publish Docker
+      # Build and publish Docker image
       - ...
         ...
 ```
 
-## 3 - Package your Application as Container
+## 3 - Package your application as a container image
 
-For the delivery, you will have to do the following steps:
+For delivering your application, you will need to complete the following steps:
 
-1. Create a new Job that depends of the `build` job
+1. Create a new job that depends on the `build` job.
 2. Add steps to build and publish a container image.
 
-When you are building workflows and you need to do specific tasks you should always look into the GitHub Marketplace to see if an action exists to do it.
+When building workflows, you should always check the GitHub Marketplace to see if certain actions can perform some of the workflow steps for you.
 
 #### GitHub Marketplace
 
-1. Go in GitHub Marketplace: <https://github.com/marketplace>
-2. Search for "Docker"
-3. Scroll down to the `Actions` section
+1. Visit the GitHub Marketplace: <https://github.com/marketplace>
+2. Search for "Docker".
+3. Scroll down to the **Actions** section.
 
-You can see many actions related to Docker, for this lab you will use the following actions:
+You will find many actions related to Docker. For this lab, you will use the following actions:
 
-- [Docker Login](https://github.com/marketplace/actions/docker-login): to connect to GitHub Container Registry (<https://ghcr.io>)
-- [Build and push Docker images](https://github.com/marketplace/actions/build-and-push-docker-images)
+- [Docker Login](https://github.com/marketplace/actions/docker-login): to connect to the GitHub Container Registry (<https://ghcr.io>).
+- [Build and push Docker images](https://github.com/marketplace/actions/build-and-push-docker-images).
 
 ### 3.1 - Edit the workflow
 
-1. Edit the file `.github/workflows/node.js.yml`, and add the `package-and-publish` job so the YAML File looks like below:
+1. Edit the file `.github/workflows/node.js.yml`, and add the `package-and-publish` job so the file looks like this:
 
     ```yaml
     name: Packaging
 
     on:
       push:
-        branches: [ "main" ]
+        branches: [ main ]
       pull_request:
-        branches: [ "main" ]
-      workflow_dispatch: 
-      
+        branches: [ main ]
+      workflow_dispatch:
+
     jobs:
       build:
-        name: "Build and Test"
+        name: Build and Test
         runs-on: ubuntu-latest
         permissions:
           contents: read
@@ -80,27 +79,27 @@ You can see many actions related to Docker, for this lab you will use the follow
           uses: actions/setup-node@v3
           with:
             node-version: 16.x
-            cache: 'npm'
+            cache: npm
         - run: npm ci
         - run: npm run build --if-present
         - run: npm test
-        - name: 'Report Coverage'
-          uses:  davelosert/vitest-coverage-report-action@v2
+        - name: Report Coverage
+          uses: davelosert/vitest-coverage-report-action@v2
           if: always()
-        
+
       package-and-publish:
-        needs: 
+        needs:
           - build
-   
+
         name: 🐳 Package & Publish
         runs-on: ubuntu-latest
         permissions:
           contents: read
           packages: write
-        
+
         steps:
           - uses: actions/checkout@v3
-          
+
           - name: Set up Docker Buildx
             uses: docker/setup-buildx-action@v2
 
@@ -131,15 +130,15 @@ You can see many actions related to Docker, for this lab you will use the follow
               cache-to: type=gha,mode=max
     ```
 
-2. Commit the `.github/workflows/node.js.yml` file.
+2. Commit the changes to `.github/workflows/node.js.yml`.
 
-3. The workflow will automatically start on Push and the workflow will do the full CI process.
+3. Upon pushing, the workflow will automatically start and carry out the full CI process.
 
-4. Look into the Workflow Runs and inspect the "Build and Publish Container Image" logs.
+4. Review the workflow runs and inspect the "Build and Publish Container Image" logs.
 
 ## 4 - The GITHUB_TOKEN
 
-As you might have noticed, in the `package-and-publish` job in the workflow file above, we are using the [`GITHUB_TOKEN`](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#about-the-github_token-secret) to sign in to the GitHub Container Registry and push the generated docker image.
+As you may have noticed in the `package-and-publish` job of the workflow file mentioned above, we use the [`GITHUB_TOKEN`](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#about-the-github_token-secret) to sign in to the GitHub Container Registry and push the generated Docker image.
 
 ```yaml
         - name: Sign in to GitHub Container Registry
@@ -150,43 +149,41 @@ As you might have noticed, in the `package-and-publish` job in the workflow file
             registry: ghcr.io
 ```
 
-You have heard of the `GITHUB_TOKEN` in [Part 02 - Basics of CI with Actions](002-basics-of-ci-with-actions.md) already when we were talking about the `permissions` of a workflow.
+You may recall the `GITHUB_TOKEN` from [Part 02 - Basics of CI with Actions](002-basics-of-ci-with-actions.md) when we discussed the permissions of a workflow.
 
-These permissions are not just magically applied to a workflow, but they are actually passed to the `GITHUB_TOKEN`, which conveniently gets stored for you as a default `secret`. Think of the `GITHUB_TOKEN` as a combination of username & password that grants access to GitHub Resources.
+These permissions aren't automatically applied to a workflow; they are actually passed to the `GITHUB_TOKEN`, which is conveniently stored for you as a default `secret`. Think of the `GITHUB_TOKEN` as a combination of a username and password that grants access to GitHub resources.
 
-Most actions (e.g. the `davelosert/vitest-coverage-report-action`) use this token by default, so you don't have to actually specify it.
+Many actions, like `davelosert/vitest-coverage-report-action`, use this token by default, so you typically don't have to specify it.
 
-Other Actions like the `docker/login-action` however require you to specifically pass it down through the Action's input parameters - and, in these situations, you can easily access it through the `secrets`-context as seen above with `${{ secrets.GITHUB_TOKEN }}`.
+However, some actions, such as `docker/login-action`, require you to explicitly pass the token through the action's input parameters. In these cases, you can easily access it using the `secrets` context, as demonstrated above with `${{ secrets.GITHUB_TOKEN }}`.
 
 ### Limits of the GITHUB_TOKEN
 
-Note that the permissions that can be granted to the `GITHUB_TOKEN` are limited to the scope of the repository of the Actions Workflow itself. That suffices for a lot of use-cases - but sometimes, you will want to access and / or change something in another repository or even on the organization level.
+Note that the permissions that can be granted to the `GITHUB_TOKEN` are limited to the scope of the repository where the Actions workflow is running. While this is sufficient for many use cases, there are times when you might want to access or modify something in another repository or even at the organization level.
 
-This scenario is out of scope for this workshop, but if you are interested in how to solve this, you have two options:
+This scenario is beyond the scope of this workshop, but if you're interested in addressing this, you have two options:
 
-1. Create a [Personal Access Token (PAT)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) with elevated permissions that you then provide to the GitHub Workflow by [storing it in a Repository Secret](https://docs.github.com/en/enterprise-cloud@latest/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository)
-2. Create and install a [GitHub Application](https://docs.github.com/en/enterprise-cloud@latest/apps/maintaining-github-apps/installing-github-apps) in your organization and then use the [Workflow Application Token Action](https://github.com/peter-murray/workflow-application-token-action) to generate a short-lived token during the workflow run
+1. Create a [personal access token (PAT)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) with the necessary permissions, and then provide it to the GitHub Actions workflow by [storing it as a repository secret](https://docs.github.com/en/enterprise-cloud@latest/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository).
+2. Create and install a [GitHub App](https://docs.github.com/en/enterprise-cloud@latest/apps/maintaining-github-apps/installing-github-apps) in your organization, and then use the [workflow application token action](https://github.com/peter-murray/workflow-application-token-action) to generate a short-lived token during the workflow run.
 
-## 5 - Find your image in GitHub Container Registry
+## 5 - Locate your image in the GitHub Container Registry
 
-1. Go to your project main page
-
-2. Click on the **Packages** link in the right menu
-
-3. Click on your container
+1. Navigate to your project's main page.
+2. Click on the **Packages** link on the right menu.
+3. Select your container.
 
 ![](../images/img-037.png)
 
 ## Conclusion
 
-In this lab you have learned how to :
+In this lab, you have learned how to:
 
-- 👏 Build and Publish a Container Image using GitHub Actions
-- 👏 Make use of the `GITHUB_TOKEN`
-- 👏 Navigate to GitHub Packages
+- 👏 Build and publish a container image using GitHub Actions.
+- 👏 Make use of the `GITHUB_TOKEN`.
+- 👏 Navigate to GitHub Packages.
 
 ---
 
-Next :
+Next:
 
 - **[Security](004-security.md)**
