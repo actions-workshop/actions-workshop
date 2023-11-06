@@ -176,7 +176,7 @@ This scenario is beyond the scope of this workshop, but if you're interested in 
 
 ## Conclusion
 
-In this lab, you've learned how to:
+In this lab, you have learned how to:
 
 - 👏 Build and publish a container image using GitHub Actions.
 - 👏 Make use of the `GITHUB_TOKEN`.
