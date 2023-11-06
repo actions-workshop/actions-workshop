@@ -149,7 +149,7 @@ As you may have noticed in the `package-and-publish` job of the workflow file me
             registry: ghcr.io
 ```
 
-You may recall the `GITHUB_TOKEN` from [lab 2](002-basics-of-ci-with-actions.md) when we discussed the permissions of a workflow.
+You may recall the `GITHUB_TOKEN` from [Part 02 - Basics of CI with Actions](002-basics-of-ci-with-actions.md) when we discussed the permissions of a workflow.
 
 These permissions aren't automatically applied to a workflow; they are actually passed to the `GITHUB_TOKEN`, which is conveniently stored for you as a default `secret`. Think of the `GITHUB_TOKEN` as a combination of a username and password that grants access to GitHub resources.
 
