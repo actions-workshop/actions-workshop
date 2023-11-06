@@ -15,7 +15,7 @@ In this lab, you will leverage GitHub Actions to enhance security through automa
 2. **Code security**: You will perform static code analysis with CodeQL to ensure you're not introducing security vulnerabilities through the code changes you make. After all, even rocket scientists make mistakes!
 
 > **Note**:
-> Both of these features are part of GitHub Advanced Security (or GHAS for short), which offers additional security features beyond the actions we're using in this workshop. It's free for public repositories and can thus be used in this workshop. For more details, see [this page](https://docs.github.com/en/code-security/secure-coding/about-github-advanced-security).
+> Both of these features are part of GitHub Advanced Security (or GHAS for short), which offers additional security features beyond the actions we are using in this workshop. It's free for public repositories and can thus be used in this workshop. For more details, see [this page](https://docs.github.com/en/code-security/secure-coding/about-github-advanced-security).
 
 ## Preparation: Enable dependency graph and GitHub Advanced Security (GHAS)
 
