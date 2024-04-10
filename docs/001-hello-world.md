@@ -135,7 +135,7 @@ You can use environment variables to add information that you would like to refe
     ```
 
 <details>
-<summary>Your workflow file (main.yml) should now look like this:</summary>
+<summary>Your workflow file (hello.yml) should now look like this:</summary>
 
 ```yml
 name: Hello World Training Workflow
