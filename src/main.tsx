@@ -18,3 +18,4 @@ root.render(
     <App />
   </React.StrictMode>
 );
+// Added for testing CI workflow with coverage report
