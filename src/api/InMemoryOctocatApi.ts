@@ -8,7 +8,7 @@ interface InMemoryOctocatApi extends OctocatApi {
 }
 
 const createInMemoryOctocatApi = (
-  initialCats: Octocat[] = []
+  initialCats: Octocat[] = [],
 ): InMemoryOctocatApi => {
   let allOctoCats = [...initialCats];
   let personalOctoCats: Record<string, Octocat[]> = {};
@@ -38,7 +38,7 @@ const createInMemoryOctocatApi = (
     removeOctocatFromUser: async ({ itemId, userId }) => {
       const existingUserCats = personalOctoCats[userId] ?? [];
       personalOctoCats[userId] = existingUserCats.filter(
-        (cat) => cat.id !== itemId
+        (cat) => cat.id !== itemId,
       );
       return Promise.resolve(personalOctoCats[userId]);
     },

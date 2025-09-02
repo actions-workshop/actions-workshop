@@ -1,4 +1,4 @@
-import { Button, Header, StyledOcticon } from "@primer/react";
+import { Button, Header } from "@primer/react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { FunctionComponent, ReactElement } from "react";
@@ -34,8 +34,8 @@ const AppHeader: FunctionComponent = (): ReactElement => {
   return (
     <Header>
       <Header.Item full>
-        <StyledOcticon icon={MarkGithubIcon} size={32} sx={{ mr: 2 }} />
-        <GHStyledLink to="/">RocketDex</GHStyledLink>
+        <MarkGithubIcon size={32} fill="#ffffff" />
+        <GHStyledLink to="/" style={{ marginLeft: '8px' }}>RocketDex</GHStyledLink>
       </Header.Item>
       <Header.Item>
         {isLoggedIn ? (

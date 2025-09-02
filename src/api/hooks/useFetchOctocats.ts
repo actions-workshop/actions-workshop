@@ -23,7 +23,7 @@ const useFetchOctocats = (): UseQueryResult<OctocatState[], unknown> => {
       (octocat): OctocatState => ({
         ...octocat,
         owned: ownedCats.some((ownedCat) => ownedCat.id === octocat.id),
-      })
+      }),
     );
   });
 

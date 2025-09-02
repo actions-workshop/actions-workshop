@@ -31,14 +31,17 @@ const OctoItemBox: FunctionComponent<OctoItemBoxProps> = ({
       aria-label={`Add ${octocat.name} to your collection`}
       size="large"
       sx={{ ml: 2 }}
-      variant="outline"
+      variant="default"
       icon={StarIcon}
       onClick={() => onToggleOctocat(octocat)}
     />
   );
 
   return (
-    <Box width={[1, 1 / 2, 1 / 3, 1 / 4]} p={[2, 4, 16]}>
+    <Box 
+      width={{ xs: "100%", sm: "50%", md: "33.333%", lg: "25%" }} 
+      p={{ xs: 2, sm: 4, md: 16 }}
+    >
       <Box
         p={2}
         borderColor="border.default"

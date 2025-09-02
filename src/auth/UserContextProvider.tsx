@@ -17,7 +17,7 @@ type UserContextValue = {
 };
 
 const UserContext = React.createContext<UserContextValue | undefined>(
-  undefined
+  undefined,
 );
 
 interface UserContextProviderProps extends PropsWithChildren {
@@ -68,7 +68,7 @@ const useUser = (): UserState => {
 
   if (!userContext) {
     throw new Error(
-      'No UserContextProvider - Wrap your App with the <UserContextProvider> before using the "useUser"-hook.'
+      'No UserContextProvider - Wrap your App with the <UserContextProvider> before using the "useUser"-hook.',
     );
   }
 

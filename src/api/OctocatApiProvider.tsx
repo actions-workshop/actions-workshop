@@ -20,7 +20,7 @@ const useOctocatApi = (): OctocatApi => {
 
   if (!octocatApi) {
     throw new Error(
-      'No OctocatApiProvider - Wrap your App with the <OctoatCollectionApiProvider> before using the "useOctocapApi"-hook.'
+      'No OctocatApiProvider - Wrap your App with the <OctoatCollectionApiProvider> before using the "useOctocapApi"-hook.',
     );
   }
 

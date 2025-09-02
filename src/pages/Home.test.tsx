@@ -6,10 +6,16 @@ import { User } from "../api/types/User";
 import { useUser } from "../auth/UserContextProvider";
 import userEvent from "@testing-library/user-event";
 import { cleanup, screen } from "@testing-library/react";
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, beforeEach } from "vitest";
 import { Route, Routes } from "react-router-dom";
 
 describe("<Home />", (): void => {
+  let user: ReturnType<typeof userEvent.setup>;
+
+  beforeEach((): void => {
+    user = userEvent.setup();
+  });
+
   afterEach((): void => {
     cleanup();
   });
@@ -57,16 +63,16 @@ describe("<Home />", (): void => {
     });
 
     const addButton = await screen.findByLabelText(
-      "Add Octocat 1 to your collection"
+      "Add Octocat 1 to your collection",
     );
 
-    await userEvent.click(addButton);
+    await user.click(addButton);
 
     expect(await screen.findByTestId("loginpage")).toBeDefined();
   });
 
   it("renders a 'Remove form collection' button if octocat belongs to user.", async (): Promise<void> => {
-    const user: User = { id: "id1", name: "testuser" };
+    const testUser: User = { id: "id1", name: "testuser" };
     const inMemoryAPI = createInMemoryOctocatApi();
     inMemoryAPI.addOctocats([
       createTestOctocat({ id: "#1", name: "Octocat 1" }),
@@ -76,16 +82,16 @@ describe("<Home />", (): void => {
     renderWithProviders({
       component: <Home />,
       inMemoryApi: inMemoryAPI,
-      initialUser: user,
+      initialUser: testUser,
     });
 
     expect(
-      await screen.findByLabelText("Remove Octocat 1 from your collection")
+      await screen.findByLabelText("Remove Octocat 1 from your collection"),
     ).toBeDefined();
   });
 
   it("adds given cat to user if clicked on add button.", async (): Promise<void> => {
-    const user: User = { id: "id1", name: "testuser" };
+    const testUser: User = { id: "id1", name: "testuser" };
     const inMemoryAPI = createInMemoryOctocatApi();
     inMemoryAPI.addOctocats([
       createTestOctocat({ id: "#1", name: "Octocat 1" }),
@@ -94,22 +100,22 @@ describe("<Home />", (): void => {
     renderWithProviders({
       component: <Home />,
       inMemoryApi: inMemoryAPI,
-      initialUser: user,
+      initialUser: testUser,
     });
 
     const addButton = await screen.findByLabelText(
-      "Add Octocat 1 to your collection"
+      "Add Octocat 1 to your collection",
     );
 
-    await userEvent.click(addButton);
+    await user.click(addButton);
 
     expect(
-      await screen.findByLabelText("Remove Octocat 1 from your collection")
+      await screen.findByLabelText("Remove Octocat 1 from your collection"),
     ).toBeDefined();
   });
 
   it("removes Octocat from users collection if clicked on remove button", async (): Promise<void> => {
-    const user: User = { id: "id1", name: "testuser" };
+    const testUser: User = { id: "id1", name: "testuser" };
     const inMemoryAPI = createInMemoryOctocatApi();
     inMemoryAPI.addOctocats([
       createTestOctocat({ id: "#1", name: "Octocat 1" }),
@@ -119,21 +125,21 @@ describe("<Home />", (): void => {
     renderWithProviders({
       component: <Home />,
       inMemoryApi: inMemoryAPI,
-      initialUser: user,
+      initialUser: testUser,
     });
 
     const removeButton = await screen.findByLabelText(
-      "Remove Octocat 1 from your collection"
+      "Remove Octocat 1 from your collection",
     );
-    await userEvent.click(removeButton);
+    await user.click(removeButton);
 
     expect(
-      await screen.findByLabelText("Add Octocat 1 to your collection")
+      await screen.findByLabelText("Add Octocat 1 to your collection"),
     ).toBeDefined();
   });
 
   it("removes mark of all owned cats if user logs out.", async (): Promise<void> => {
-    const user: User = { id: "id1", name: "testuser" };
+    const testUser: User = { id: "id1", name: "testuser" };
     const inMemoryAPI = createInMemoryOctocatApi();
     inMemoryAPI.addOctocats([
       createTestOctocat({ id: "#1", name: "Octocat 1" }),
@@ -157,15 +163,15 @@ describe("<Home />", (): void => {
         </>
       ),
       inMemoryApi: inMemoryAPI,
-      initialUser: user,
+      initialUser: testUser,
     });
 
     await screen.findByLabelText("Remove Octocat 1 from your collection");
 
-    await userEvent.click(screen.getByTestId("logoutbutton"));
+    await user.click(screen.getByTestId("logoutbutton"));
 
     expect(
-      await screen.findByLabelText("Add Octocat 1 to your collection")
+      await screen.findByLabelText("Add Octocat 1 to your collection"),
     ).toBeDefined();
   });
 });

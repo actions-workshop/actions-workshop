@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   dev:
-    image: ghcr.io/octodemo/container-nodejs-development:base-20220501
+    image: ghcr.io/octodemo/development-containers/javascript-nodejs-22:base-202408-r2
     command: sleep infinity
     network_mode: host
 

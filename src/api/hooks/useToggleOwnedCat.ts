@@ -20,7 +20,7 @@ const useToggleOwnedCat = () => {
       onSuccess: () => {
         queryClient.invalidateQueries("octocats");
       },
-    }
+    },
   );
 
   return mutation;
