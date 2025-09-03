@@ -38,8 +38,8 @@ const OctoItemBox: FunctionComponent<OctoItemBoxProps> = ({
   );
 
   return (
-    <Box 
-      width={{ xs: "100%", sm: "50%", md: "33.333%", lg: "25%" }} 
+    <Box
+      width={{ xs: "100%", sm: "50%", md: "33.333%", lg: "25%" }}
       p={{ xs: 2, sm: 4, md: 16 }}
     >
       <Box

@@ -35,7 +35,9 @@ const AppHeader: FunctionComponent = (): ReactElement => {
     <Header>
       <Header.Item full>
         <MarkGithubIcon size={32} fill="#ffffff" />
-        <GHStyledLink to="/" style={{ marginLeft: '8px' }}>RocketDex</GHStyledLink>
+        <GHStyledLink to="/" style={{ marginLeft: "8px" }}>
+          RocketDex
+        </GHStyledLink>
       </Header.Item>
       <Header.Item>
         {isLoggedIn ? (

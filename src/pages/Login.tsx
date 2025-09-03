@@ -45,12 +45,12 @@ const Login: FunctionComponent = (): ReactElement => {
           <TextInput
             value={username}
             onChange={(event) => setUsername(event.target.value)}
-            sx={{ 
-              border: '1px solid',
-              borderColor: 'border.default',
-              '&:focus': {
-                borderColor: 'accent.emphasis'
-              }
+            sx={{
+              border: "1px solid",
+              borderColor: "border.default",
+              "&:focus": {
+                borderColor: "accent.emphasis",
+              },
             }}
           />
         </FormControl>
@@ -60,19 +60,23 @@ const Login: FunctionComponent = (): ReactElement => {
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            sx={{ 
-              border: '1px solid',
-              borderColor: 'border.default',
-              '&:focus': {
-                borderColor: 'accent.emphasis'
-              }
+            sx={{
+              border: "1px solid",
+              borderColor: "border.default",
+              "&:focus": {
+                borderColor: "accent.emphasis",
+              },
             }}
           />
         </FormControl>
         <Box sx={{ mt: 3 }}>
           <Button type="submit">Sign in</Button>
         </Box>
-        {error && <Flash variant="danger" sx={{ mt: 3 }}>{error}</Flash>}
+        {error && (
+          <Flash variant="danger" sx={{ mt: 3 }}>
+            {error}
+          </Flash>
+        )}
       </form>
     </Box>
   );

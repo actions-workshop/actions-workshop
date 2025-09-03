@@ -27,7 +27,7 @@ const Home: FunctionComponent = (): ReactElement => {
     mutation.mutate(octocat);
   };
 
-  if (status === "loading") {
+  if (status === "pending") {
     return <p>Loading...</p>;
   }
 

@@ -4,7 +4,7 @@ import { OctocatApiProvider } from "../src/api/OctocatApiProvider";
 import { render } from "@testing-library/react";
 import { User } from "../src/api/types/User";
 import { UserContextProvider } from "../src/auth/UserContextProvider";
-import { QueryClient, QueryClientProvider } from "react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const renderWithProviders = ({
   component,
