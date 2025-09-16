@@ -41,7 +41,7 @@ jobs:
           echo "- Failed: 0" >> $GITHUB_STEP_SUMMARY
 ```
 
-This creates a rich Markdown that simplifies awareness of status or outputs data relevant to the actions run.  Full documentation on job summaries is available [here](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands#adding-a-job-summary).  Anything you can do in Markdown you can do in a job summary.  An example can be seen in the video in this [Copilot usage GitHub Action](https://github.com/austenstone/copilot-usage)
+This creates a rich Markdown that simplifies awareness of status or outputs data relevant to the actions run.  Full documentation on job summaries is available [here](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands#adding-a-job-summary).  Anything you can do in Markdown you can do in a job summary.  An example can be seen in the video in this [Copilot usage action](https://github.com/austenstone/copilot-usage)
 
 ## 3 — Status Badges
 
@@ -91,68 +91,37 @@ Note it is also possible to set a default retention period for all artifacts at 
 
 > It is important to note that artifacts are not a secure way to pass sensitive data.  Artifacts are stored unencrypted and can be downloaded by anyone with read access to the repository.  For sensitive data, consider using encrypted secrets or other secure storage mechanisms.
 
-
-
-## 5 — Demo: Annotated Lint + Job Summary
-
-**Workflow Example**
-
-```yaml
-name: Lint & Report
-
-on: [push]
-
-jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: |
-          echo "::warning file=index.js,line=2::Unused variable"
-          echo "::error file=main.js,line=10::Missing semicolon"
-
-  summary:
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          echo "## Build Report" >> $GITHUB_STEP_SUMMARY
-          echo "Lint completed with warnings/errors" >> $GITHUB_STEP_SUMMARY
-```
-
----
-
-## 6 — Lab: Step Summary, Artifacts, and Badges
+## 5 — Lab: Step Summary, Artifacts, and Badges
 
 In this lab we will enhance our workflow by adding step summaries, uploading test artifacts, setting a retention period, and including status badges.
 
 Create a new actions workflow that includes a test summary with artifacts at `.github/workflows/test-report.yml`:
 
-   ```yaml
-   name: Test Report Lab
+```yaml
+name: Test Report Lab
 
-   on: 
-     push:
-     workflow_dispatch:
+on: 
+  workflow_dispatch:
 
-   jobs:
-     test:
-       runs-on: ubuntu-latest
-       steps:
-         - uses: actions/checkout@v4
-         - run: npm ci
-         - run: npm test -- --json --outputFile=report.json || true
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - run: npx vitest run --reporter=json --outputFile=report.json 
 
-         - uses: actions/upload-artifact@v4
-           with:
-             name: test-report
-             path: report.json
-             retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: report.json
+          retention-days: 7
 
-         - name: Write summary
-           run: |
-             echo "### Test Report" >> $GITHUB_STEP_SUMMARY
-             echo "See attached artifact for full details" >> $GITHUB_STEP_SUMMARY
-   ```
+      - name: Write summary
+        run: |
+          echo "### Test Report" >> $GITHUB_STEP_SUMMARY
+          echo "See attached artifact for full details" >> $GITHUB_STEP_SUMMARY
+```
 
 After committing and pushing, manually trigger the workflow using the "Run workflow" button in the Actions tab.
 

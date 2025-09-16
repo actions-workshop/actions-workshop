@@ -4,11 +4,11 @@ As automation and CI/CD pipelines become central to software delivery, governanc
 
 ## 1 — SLSA Level 3, SBOMs & Artifact Attestations
 
-**SLSA (Supply-chain Levels for Software Artifacts)** is a framework for securing software supply chains.  It's purpose is to prevent tampering, ensuring traceability, and providing guarantees about how software artifacts are built and delivered.  This helps defend against threats such as unauthorized code changes, compromised build environments, and dependency attacks. 
+**SLSA (Supply-chain Levels for Software Artifacts)** is a framework for securing software supply chains.  It's purpose is to prevent tampering, ensuring traceability, and provide guarantees about how software artifacts are built and delivered.  This helps defend against threats such as unauthorized code changes, compromised build environments, and dependency attacks. 
 
-Level 3 requires:
+SLSA Level 3 requires:
 
-- **Builds run on a hosted, ephemeral environment** (GitHub-hosted runners)
+- **Builds run on an ephemeral environment** (GitHub-hosted runners)
 - **Cryptographically signed provenance and attestation** for build artifacts
   - Metadata about how, when, and by whom the artifact was built
 
@@ -16,14 +16,15 @@ Not directly required but highly recommended:
 - **SBOMs (Software Bill of Materials)**: A manifest of all components and dependencies in your software, critical for vulnerability management and compliance.
 
 **Why is this important?**
-- Prevents tampering and unauthorized changes to artifacts
 - Enables traceability for every build and release
 - Facilitates rapid response to security incidents (e.g., dependency vulnerabilities)
 - Meets compliance requirements for regulated industries
 
 Follow these steps to put governance concepts into practice in your own repository.
 
-Configure a basic workflow on a GitHub-hosted runner to ensure builds are isolated and ephemeral.  Also we will add steps to generate an SBOM to include all project dependencies as well as generating build provenance for our artifact and attestation for our SBOM. These features are available natively in GitHub Actions via the `actions/attest-build-provenance` and `actions/attest-sbom` actions.
+> IMPORTANT: To generate attestations, you must have a GitHub Enterprise Cloud plan or be part of an organization that has one.  Alternatively attestations do work if your repository is public on a personal account.
+
+First, we will configure a basic workflow on a GitHub-hosted runner to ensure builds are isolated and ephemeral.  We will add steps to generate an SBOM to include all project dependencies as well as generate build provenance for our artifact and attestation for our SBOM. These features are available natively in GitHub Actions via the `actions/attest-build-provenance` and `actions/attest-sbom` actions.
 
 Create `.github/workflows/governance.yml` with the following content:
 ```yaml
@@ -59,18 +60,19 @@ jobs:
       - name: Run tests
         run: npm test
 
-      # Generate SBOM with CycloneDX
-      - name: Install cyclonedx-node-npm and Generate SBOM
-        run: | 
-          npm install -g @cyclonedx/cyclonedx-node-npm
-          cyclonedx-node-npm --output-format json --output-file sbom.json
-
       # Create a build artifact (zip the dist folder)
       - name: Create build artifact
         run: |
           cd dist
           zip -r ../build-artifact.zip .
           cd ..
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          format: 'cyclonedx-json'
+          output-file: 'sbom.json'
+          path: 'dist'
 
       # Generate artifact attestation for build provenance
       - name: Generate artifact attestation
@@ -100,19 +102,24 @@ jobs:
           path: sbom.json
 ```
 
-> For reference, GitHub's documentation on artifact attestation is available [here](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations)
+Now commit and push your changes to trigger the workflow.  While it is running, review the workflow file to understand the steps taken.  After it completes, you should see the build artifact and SBOM uploaded as artifacts in the workflow run.
 
-Now commit and push your changes to trigger the workflow.  After it completes, you should see the build artifact and SBOM uploaded as artifacts in the workflow run.
+> For reference, GitHub's documentation on artifact attestation is available [here](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations)
 
 At this point you can verify the attestations using the GitHub CLI.  First, download the build artifacts (binary and SBOM) from the workflow run, then run the following commands to verify build provenance while replacing `OWNER/REPOSITORY_NAME` with your actual repository:
 
 ```bash
+# Download the artifacts for the 'Governance' workflow
+gh run list --limit 5
+gh run download <run-id> -n build-artifact
+gh run download <run-id> -n sbom
+
 gh attestation verify build-artifact.zip -R OWNER/REPOSITORY_NAME
+# Note in a codespace you can can use the GITHUB_REPOSITORY environment variable
+# gh attestation verify build-artifact.zip -R $GITHUB_REPOSITORY
 
 # Verify SBOM attestation (CycloneDX format):
-gh attestation verify build-artifact.zip \
-  -R OWNER/REPOSITORY_NAME \
-  --predicate-type https://cyclonedx.org/bom/v1.6
+ gh attestation verify build-artifact.zip -R OWNER/REPOSITORY_NAME --predicate-type "https://cyclonedx.org/bom" 
 
 # View detailed SBOM information in JSON format:
 gh attestation verify build-artifact.zip \
@@ -120,9 +127,6 @@ gh attestation verify build-artifact.zip \
   --predicate-type https://cyclonedx.org/bom/v1.6 \
   --format json \
   --jq '.[].verificationResult.statement.predicate'
-
-# Alternative: If using SPDX format, use this predicate type instead:
-# --predicate-type https://spdx.dev/Document/v2.3
 ```
 
 > Note: The `gh` CLI commands assume you have the GitHub CLI installed and authenticated. You can install it from [here](https://cli.github.com/).
@@ -134,6 +138,11 @@ There commands above will verify the signatures and integrity of the artifacts i
 * Cryptographic signatures: Ensures the artifact and SBOM are authentic and have not been tampered with since creation
 * Workflow identity: Verifies the artifact was produced by the intended workflow in your repository
 
+Clean up the downloaded artifacts from your local machine.
+
+```bash
+rm build-artifact.zip sbom.json
+```
 
 ## 2 — Enforcing Workflows and Compliance with Repository Rulesets
 
@@ -176,7 +185,9 @@ jobs:
           fi
 ```
 
-Note all this is doing is failing by default to showcase the ruleset enforcement.  Manually trigger the workflow once with `approve=true` to confirm it runs and passes.
+Note all this is doing is failing by default to showcase the ruleset enforcement.  
+
+Commit and Push this workflow.  Note the execution on push will fail.  This is expected.  Manually trigger the workflow once and set the `Approve this workflow run` to `true` to confirm it runs and passes.
 
 Now we will create a ruleset to require this workflow to run and block our pull request from being merged.
 
@@ -191,7 +202,8 @@ Now we will create a ruleset to require this workflow to run and block our pull 
      - Dismiss stale pull request approvals when new commits are pushed
      - Automatically request Copilot code reviews
      - Block force pushes
-  5. The `Require status checks to pass before merging` option allows you to select specific workflows that must complete successfully before a pull request can be merged.  Select the `Simple Governance Check / governance-check.yml` workflow here.  Note this workflow must have run at least once on the branch to appear in the list.
+  5. The `Require status checks to pass before merging` option allows you to select specific workflows that must complete successfully before a pull request can be merged.  Type `approval-gate` and select it.  Note this is the job name, not the workflow name.  Also note this workflow must have run at least once on the branch to appear in the list.
+     - At the org level the same option is called `Require workflows to pass before merging`
   6. Click `Create` to save the ruleset.
 
 Now create a branch, make any change to your repository (such as adding a new markdown file), and open a pull request to `main`.  You should see that the pull request cannot be merged because the required workflow has not completed successfully.

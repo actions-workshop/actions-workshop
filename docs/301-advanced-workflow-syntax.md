@@ -41,7 +41,7 @@ These are typical operators similar to other programming languages:
 - Logical: `&&`, `||`, `!`
 - Arithmetic: `+`, `-`, `*`, `/`, `%`
 
-It may be helpful to review the [Expressions syntax reference](Docs: https://docs.github.com/en/actions/reference/workflows-and-actions/expressions) for a complete list of functions and operators.
+It may be helpful to review the [Expressions syntax reference](https://docs.github.com/en/actions/reference/workflows-and-actions/expressions) for a complete list of functions and operators.
 
 ## 2 — Contexts
 
@@ -252,7 +252,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        #os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
         node: [20, 22]
     env:
       JOB_ENV: "job"
@@ -265,7 +266,7 @@ jobs:
         run: npm ci
       - name: Run tests and save log
         run: |
-          npm test | tee test.log
+          npm test | tee test-${{ matrix.os }}-${{ matrix.node }}.log
       - name: Print context values
         run: |
           echo "Branch: ${{ github.ref }}"
@@ -287,8 +288,8 @@ jobs:
       - name: Upload test log
         uses: actions/upload-artifact@v4
         with:
-          name: test-log
-          path: test.log
+          name: test-log-${{ matrix.os }}-${{ matrix.node }}
+          path: test-${{ matrix.os }}-${{ matrix.node }}.log
 ```
 
 The workflow runs `npm test` and saves the output to `test.log`.  The `Save test result output` step checks for failures and sets the output accordingly.  The test log is uploaded as an artifact.
@@ -301,12 +302,17 @@ Add a deploy job that only runs if all tests succeed and the branch is `main`.  
   deploy:
     needs: test
     if: ${{ needs.test.outputs.result == 'success' && github.ref == 'refs/heads/main' }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        # os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
+        node: [20, 22]
     steps:
       - name: Download test log
         uses: actions/download-artifact@v4
         with:
-          name: test-log
+          name: test-log-${{ matrix.os }}-${{ matrix.node }}
       - run: echo "Deploying to production"
 ```
 

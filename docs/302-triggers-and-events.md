@@ -126,12 +126,16 @@ jobs:
 Trigger with API:
 
 ```bash
-curl -X POST   -H "Authorization: token <PAT>"   -H "Accept: application/vnd.github+json"   https://api.github.com/repos/OWNER/REPO/dispatches   -d '{"event_type":"deploy"}'
+curl -X POST \
+  -H "Authorization: token <PAT>" \
+  -H "Accept: application/vnd.github+json" \
+  https://api.github.com/repos/OWNER/REPO/dispatches \
+  -d '{"event_type":"deploy"}'
 ```
 
 ## 6 - Chaining Workflows
 
-Often you will want to break up your workflows into multiple stages where one triggers another.  This can be done by using the `needs:` keyword.  However, you can also trigger one workflow from another using `workflow_run`.  This is useful if you want to separate concerns or have different teams own different workflows. 
+Often you will want to break up your workflows into multiple stages where one job triggers another.  This can be done by using the `needs:` keyword within a workflow with multiple jobs.  However, you can also trigger one workflow from another using `workflow_run`.  This is useful if you want to separate concerns or have different teams own different workflows. 
 
 **Example:**
 
@@ -149,7 +153,9 @@ jobs:
     needs: build
     steps:
       - run: echo "Testing..."
+```
 
+```yaml
 # .github/workflows/deploy.yml
 name: Deploy
 on:
@@ -207,8 +213,6 @@ In this lab we will walk through a few examples from the above triggers.
 * Chaining with workflow_run and workflow_dispatch
 * Triggering with repository_dispatch
 
-TODO - Give a couple examples here... 
-
 ### 1 - Schedule and Manual Trigger
 
 Here we will create a workflow that runs on a schedule as well as manually.  This could be used for scheduled builds, nightly tests, or other periodic tasks.  In this example we will run every 5 minutes so that you can see it in action.  
@@ -246,14 +250,11 @@ Wait for a 5 minute interval to see it run automatically.  Once it has run, I su
 
 To chain workflows, we will create two workflows.  The first will build and test code.  The second will deploy only after the first completes.
 
-In your repo, create a `.github/workflows/test.yml`:
+In your repo, create a `.github/workflows/chaining-test.yml`:
 
 ```yaml
-name: Build and Test
+name: Chaining - Build and Test
 on:
-  push:
-  pull_request:
-    branches: [ main ]
   workflow_dispatch:
 jobs:
   build:
@@ -267,10 +268,10 @@ jobs:
       - run: echo "Testing..."
 ```
 
-Then create another workflow, `.github/workflows/deploy.yml`: 
+Then create another workflow, `.github/workflows/chaining-deploy.yml`: 
 
 ```yaml
-name: Deploy
+name: Chaining - Deploy
 on:
   workflow_run:
     workflows: ["Build and Test"]
@@ -283,9 +284,9 @@ jobs:
       - run: echo "Deploying after build and test!"
 ```
 
-This should be a typical workflow where code is built and tested on push or PR, and then deployed only after successful completion.
+This is a typical workflow where code is built and tested on push or PR, and then deployed only after successful completion.  Typically this would be triggered on push or pull request, but for the sake of the lab we will use `workflow_dispatch` to manually trigger it.
 
-Execute this by manually triggering the `Build and Test` workflow using the `workflow_dispatch` button in the Actions tab.  Monitor that the job completes, then see that the `Deploy` workflow runs automatically after.
+Go to the Actions tab in the repo, navigate to `Chaining - Build and Test`, and execute this by manually triggering this with the `Run workflow` button in the Actions tab.  Monitor that the job completes, then see that the `Chaining - Deploy` workflow runs automatically after.
 
 ### 3 - External Trigger with repository_dispatch
 
@@ -307,7 +308,7 @@ jobs:
       - run: echo "Triggered by external event!"
 ```
 
-To trigger this workflow, you will need to use the GitHub API.  You can do this with `curl` or any HTTP client.  You will need a personal access token (PAT) to authenticate.  Options:
+Commit and push this workflow to your repository.  To trigger this workflow, you will need to use the GitHub API.  You can do this with `curl` or any HTTP client.  You will need a personal access token (PAT) to authenticate.  Options:
 * Classic token with `repo` scope.
 * Fine-grained token with `Actions: Read and write` permission and `Contents: Read and write` access.
 
@@ -317,7 +318,9 @@ curl -X POST \
   -H "Authorization: token YOUR_TOKEN" \
   -d '{"event_type":"trigger"}'
 ```
-Replace `OWNER`, `REPO`, and `YOUR_TOKEN` with your GitHub username, repository name, and personal access token respectively.
+If in a codespace you can run `echo $GITHUB_REPOSITORY` to find the OWNER and REPO.  Otherwise they are just part of your repository URL.  Replace `OWNER`, `REPO`, and `YOUR_TOKEN` with your GitHub username, repository name, and personal access token respectively.
+
+Monitor in the Actions tab that the `External Trigger Lab` workflow runs successfully.
 
 ## Conclusion
 

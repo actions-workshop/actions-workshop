@@ -56,6 +56,12 @@ jobs:
 
 Note the repeated steps for checking out the code, setting up Node.js, and installing dependencies.  We can extract these into a reusable composite workflow.
 
+Create a new directory for the composite action:
+
+```bash
+mkdir -p .github/actions/setup-and-install
+```
+
 Create a file for the composite workflow at `.github/actions/setup-and-install/action.yml`.  Note the use of an action.yml file to define the composite action.  This aligns with how JavaScript and Docker actions are defined.  Use the following content:
 
 ```yaml
@@ -68,11 +74,11 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node-version }}
     - run: npm ci
+      shell: bash
 ```
 
 Now create a new workflow that uses this composite action.  Create `.github/workflows/composite-call-ci.yml` with the following content:
@@ -82,7 +88,6 @@ name: Composite CI
 
 on:
   push:
-    branches: [ main ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -91,6 +96,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-and-install
         with:
           node-version: '20'
@@ -99,13 +105,14 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-and-install
         with:
           node-version: '20'
       - run: npm run lint
 ```
 
-Execute this workflow by manually triggering it with workflow dispatch.  Review the logs of the run to see how the composite action is executed as a single step, but runs multiple steps.
+Commit and push these changes and they should trigger to run automatically.  Review the logs of the run to see how the composite action is executed as a single step, but runs multiple steps.
 
 > Note this reduces duplication compared to defining all steps in each job and may be easier to maintain than a full reusable workflow.
 
@@ -122,39 +129,57 @@ Start by creating a new folder and initializing a base action: `hello-js-action`
 mkdir hello-js-action && cd hello-js-action
 npm init -y
 npm install @actions/core @actions/github
+
+# Use rollup for bundling
+npm install --save-dev rollup @rollup/plugin-commonjs @rollup/plugin-node-resolve
+npm install -g rollup
 ```
 
-The base of an action is the `action.yml` file which defines inputs, outputs, and the runtime.  Create this file with the following content:
+The base of an action is the `action.yml` file which defines inputs, outputs, and the runtime.  Create `hello-js-action/action.yml` with the following content:
 
 ```yaml
-name: 'Hello JS Action'
-description: 'Greets the provided name'
+name: Hello JS Action
+description: Greet someone and record the time
+
 inputs:
-  name:
-    description: 'Name to greet'
+  who-to-greet: # id of input
+    description: Who to greet
     required: true
+    default: World
+
+outputs:
+  time: # id of output
+    description: The time we greeted you
+
 runs:
-  using: 'node20'
-  main: 'index.js'
+  using: node20
+  main: dist/index.js
 ```
 
 Note that this defines inputs required, but also specified the runtime and the main script to run.
 
-Next, create `index.js`, the main script for the action:
+Next, create `src/index.js`, the main script for the action:
 
 ```javascript
-const core = require('@actions/core');
+import * as core from "@actions/core";
+import * as github from "@actions/github";
 
-async function run() {
-  try {
-    const name = core.getInput('name');
-    core.info(`Hello ${name}!`);
-  } catch (error) {
-    core.setFailed(error.message);
-  }
+try {
+  // `who-to-greet` input defined in action metadata file
+  const nameToGreet = core.getInput("who-to-greet");
+  core.info(`Hello ${nameToGreet}!`);
+
+  // Get the current time and set it as an output variable
+  const time = new Date().toTimeString();
+  core.setOutput("time", time);
+
+  // Get the JSON webhook payload for the event that triggered the workflow
+  const payload = JSON.stringify(github.context.payload, undefined, 2);
+  core.info(`The event payload: ${payload}`);
+} catch (error) {
+  core.setFailed(error.message);
 }
 
-run();
 ```
 
 Finally we can create a workflow to test our action.  In your repo add `.github/workflows/test-js-action.yml`:
@@ -172,7 +197,56 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./hello-js-action
         with:
-          name: 'World'
+          who-to-greet: Mona the Octocat
+```
+
+One more thing... You probably want a `README.md` to document your action.  Create `hello-js-action/README.md` with the following content:
+
+````markdown
+# Hello world JavaScript action
+
+This action prints "Hello World" or "Hello" + the name of a person to greet to the log.
+
+## Inputs
+
+### `who-to-greet`
+
+**Required** The name of the person to greet. Default `"World"`.
+
+## Outputs
+
+### `time`
+
+The time we greeted you.
+
+## Example usage
+
+```yaml
+uses: actions/hello-world-javascript-action@e76147da8e5c81eaf017dede5645551d4b94427b
+with:
+  who-to-greet: Mona the Octocat
+```
+
+````
+
+Note committing node_modules is not recommended and is already ignored by `.gitignore`.  Instead we can use `rollup` to bundle the code and dependencies into a single file.  Create `hello-js-action/rollup.config.js` with the following content:
+
+```javascript 
+import commonjs from "@rollup/plugin-commonjs";
+import { nodeResolve } from "@rollup/plugin-node-resolve";
+
+const config = {
+  input: "src/index.js",
+  output: {
+    esModule: true,
+    file: "dist/index.js",
+    format: "es",
+    sourcemap: true,
+  },
+  plugins: [commonjs(), nodeResolve({ preferBuiltins: true })],
+};
+
+export default config;
 ```
 
 Commit and push this code to your repository.  Then manually trigger the workflow from the Actions tab.  You should see the action run and output "Hello World!" in the logs.
@@ -191,7 +265,7 @@ Docker actions let you run your logic inside a container. This is useful when yo
 
 In this lab we will create a simple Docker action that does the same steps as the previous action.  
 
-Create a new folder `hello-docker-action`
+Create a new folder `hello-docker-action`.  Make certain you are outside of the `hello-js-action` folder.
 
 ```bash
 mkdir hello-docker-action && cd hello-docker-action
@@ -215,7 +289,7 @@ For Docker actions you need to create both a `Dockerfile` as well as the code th
 
 ```bash
 #!/bin/sh -l
-echo "Hello $1"
+echo "Hello $INPUT_NAME"
 ```
 
 Create a `Dockerfile` to build the container with the following content:

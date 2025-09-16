@@ -1,19 +1,17 @@
 # Reusable Workflows: DRY, Modular & Composable Automations
 
-## Overview
-
 As your GitHub Actions usage grows, you’ll often find yourself repeating similar jobs across multiple workflows or even multiple repositories. This can quickly become hard to maintain.
 
 **Reusable workflows** allow you to centralize shared logic once, and call it from many other workflows. This follows the principle of DRY (Don't Repeat Yourself) and allows you to keep your pipelines consistent, easier to update, and easier to scale across teams.
 
-A typical pattern is for a devops or platform team to create a shared set of 'golden' pipelines that developer teams can consume.  This ensures consistency and best practices across the organization and minimizes duplicated effort.
+A typical pattern is for a devops or platform team to create a shared set of *golden* pipelines that developer teams can consume.  This ensures consistency and best practices across the organization and minimizes duplicated effort.
 
 
 ## 1 — Creating and calling a reusable workflow
 
 A reusable workflow is a workflow that uses the special trigger `workflow_call` to allow it to be called from other workflows.
 
-Create a new file in your repository called `.github/workflows/reusable/build-and-test.yml`:
+Create a new file in your repository called `.github/workflows/reusable-build-and-test.yml`:
 
 ```yaml
 name: Reusable Build and Test
@@ -28,7 +26,7 @@ on:
       run_tests:
         description: 'Whether to run tests'
         required: false
-        default: 'true'
+        default: true
         type: boolean
     secrets:
       NPM_TOKEN:
@@ -47,7 +45,7 @@ jobs:
         with:
           node-version: ${{ inputs.node_version }}
       - run: npm ci
-      - if: ${{ inputs.run_tests == 'true' }}
+      - if: ${{ inputs.run_tests }}
         run: npm test
       - name: Set output
         id: result
@@ -58,10 +56,10 @@ jobs:
 
 This is just doing a simple build and test.  Now call this reusable workflow from another workflow in the same repo.
 
-Create a new workflow `.github/workflows/ci.yml`:
+Create a new workflow `.github/workflows/call-reusable-ci.yml`:
 
 ```yaml
-name: CI Workflow
+name: Call CI Reusable Workflow
 
 on:
   push:
@@ -72,10 +70,10 @@ on:
 
 jobs:
   do-build-test:
-    uses: ./.github/workflows/reusable/build-and-test.yml
+    uses: ./.github/workflows/reusable-build-and-test.yml
     with:
       node_version: '18'
-      run_tests: 'true'
+      run_tests: true
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -86,7 +84,7 @@ jobs:
       - run: echo "Test result was ${{ needs.do-build-test.outputs.test_result }}"
 ```
 
-Manually execute the `CI Workflow` using the `Run workflow` button in the Actions tab.  Notice how it calls the reusable workflow and passes in inputs.  
+Commit and push both files.  This should trigger the `Call CI Reusable Workflow`.  Notice how it calls the reusable workflow, passes in inputs, and runs the steps inline with the rest of the workflow.
 
 > Tip: When calling a reusable workflow in the same repo, use the relative path (`./.github/workflows/...`).
 When calling from another repo, use:
@@ -105,7 +103,7 @@ jobs:
       node_versions: ['16', '18']
       os: ['ubuntu-latest', 'windows-latest']
     secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
 ```
 
 ## 3 - Inputs, Secrets, and Outputs
@@ -116,10 +114,10 @@ Reusable workflows can accept inputs and secrets, and return outputs to the call
 * Secrets are also defined under `on: workflow_call:`.  The caller can pass secrets similar to inputs, one by one.  Alternatively the caller can pass all secrets using `secrets: inherit` to forward all secrets from the caller to the called workflow.
 * Outputs are defined under `jobs.<job_id>.outputs:`.
 
-Lets test these features!  Create a new reusable workflow `.github/workflows/build-and-test.yml`:
+Lets test these features!  Create a new reusable workflow `.github/workflows/reusable-build-and-test-2.yml`:
 
 ```yaml
-name: Reusable Build and Test
+name: Reusable Build and Test 2
 
 on:
   workflow_call:
@@ -170,17 +168,18 @@ jobs:
 
 Next, create a caller workflow that passes input and secrets, and uses the output.  
 
-Create the file called `.github/workflows/ci.yml`:
+Create the file called `.github/workflows/call-reusable-ci-2.yml`:
 
 ```yaml
-name: CI Workflow
+name: Call CI Reusable Workflow 2
+
 
 on:
   workflow_dispatch:
 
 jobs:
   do-build-test:
-    uses: ./.github/workflows/build-and-test.yml
+    uses: ./.github/workflows/reusable-build-and-test-2.yml
     with:
       node_version: '18'
       custom_message: 'This is a custom message from the caller workflow!'
@@ -199,7 +198,7 @@ jobs:
 
 Now create a secret in your repo called `NPM_TOKEN`.  Go to your repository’s Settings > Secrets and variables > Actions. It doesn't need to be a real token, just any value for testing.
 
-If you haven't already, commit and push both workflow files to the `main` branch.
+Commit and push both workflow files to the `main` branch.
 
 Trigger the workflow manually from the Actions tab using the "Run workflow" button.
 
