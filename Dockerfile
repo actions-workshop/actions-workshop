@@ -1,5 +1,5 @@
 # Build container for the frontend bundle
-FROM node:22 as build
+FROM node:22 AS build
 
 WORKDIR /usr/src/app
 
@@ -9,7 +9,7 @@ RUN npm ci
 RUN npm run build:staging
 
 # Create the server to host the static files
-FROM node:22 as server
+FROM node:22 AS server
 
 WORKDIR /usr/src/app
 
@@ -19,7 +19,7 @@ RUN npm ci --omit=dev
 # Create the final image to host both, server and distribute files as public
 FROM node:lts-alpine
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 USER node
 
 WORKDIR /usr/src/app
