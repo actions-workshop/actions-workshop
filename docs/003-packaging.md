@@ -74,11 +74,11 @@ You will find many actions related to Docker. For this lab, you will use the fol
           contents: read
           pull-requests: write
         steps:
-        - uses: actions/checkout@v3
-        - name: Use Node.js 16.x
-          uses: actions/setup-node@v3
+        - uses: actions/checkout@v5
+        - name: Use Node.js 22.x
+          uses: actions/setup-node@v4
           with:
-            node-version: 16.x
+            node-version: 22.x
             cache: npm
         - run: npm ci
         - run: npm run build --if-present
@@ -98,13 +98,13 @@ You will find many actions related to Docker. For this lab, you will use the fol
           packages: write
 
         steps:
-          - uses: actions/checkout@v3
+          - uses: actions/checkout@v5
 
           - name: Set up Docker Buildx
-            uses: docker/setup-buildx-action@v2
+            uses: docker/setup-buildx-action@v3
 
           - name: Sign in to GitHub Container Registry
-            uses: docker/login-action@v2
+            uses: docker/login-action@v3
             with:
               username: ${{ github.actor }}
               password: ${{ secrets.GITHUB_TOKEN }}
@@ -112,7 +112,7 @@ You will find many actions related to Docker. For this lab, you will use the fol
 
           - name: Generate Docker Metadata
             id: meta
-            uses: docker/metadata-action@v4
+            uses: docker/metadata-action@v5
             with:
               images: ghcr.io/${{ github.repository }}
               tags: |
@@ -121,7 +121,7 @@ You will find many actions related to Docker. For this lab, you will use the fol
                 type=sha,event=branch,prefix=,suffix=,format=short
 
           - name: Build and Push Docker Image
-            uses: docker/build-push-action@v2
+            uses: docker/build-push-action@v6
             with:
               push: true
               tags: ${{ steps.meta.outputs.tags }}
@@ -142,7 +142,7 @@ As you may have noticed in the `package-and-publish` job of the workflow file me
 
 ```yaml
         - name: Sign in to GitHub Container Registry
-          uses: docker/login-action@v2
+          uses: docker/login-action@v3
           with:
             username: ${{ github.actor }}
             password: ${{ secrets.GITHUB_TOKEN }}

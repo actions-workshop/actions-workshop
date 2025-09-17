@@ -42,11 +42,10 @@ Enough talking. Let's create our very first GitHub Actions workflow!
 
     ![Screenshot showing the Web GUI Editor, highlighting the Commit changes button](images/001/web_gui_editor.png)
 
-3. Click on `Commit changes` and then commit it directly to the `main` branch (we won't tell anyone 🤫).
+3. Rename the file to `hello.yml`, click **Start Commit** and commit it directly to the `main` branch (we won't tell anyone 🤫).
 
     ![Screenshot showing the commit dialog](images/001/commit_changes.png)
 
-Rename the file to `hello.yml`, click **Start Commit** and commit it directly to the `main` branch.
 
 ### 1.2 - Run the workflow manually
 
@@ -95,9 +94,9 @@ Let's start by using one of the most basic yet commonly used actions to gain an 
     steps:
       - name: Greet the User
         run: echo "Hello World!"
-      # List all files in the current directory for comparison before and after actions/checkout@v2.
+      # List all files in the current directory for comparison before and after actions/checkout@v5.
       - run: ls -l
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v5
       - run: ls -l
     ```
 
@@ -133,6 +132,8 @@ You can use environment variables to add information that you would like to refe
               echo "Hello $MY_ENV"
               echo "Hello $GITHUB_ACTOR"
     ```
+
+3. Clean up the checkout and ls steps if you like
 
 <details>
 <summary>Your workflow file (hello.yml) should now look like this:</summary>

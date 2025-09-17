@@ -25,7 +25,7 @@ Anything you need for this workshop is contained within this template-repository
     ![Image of the green button saying Use this Repo](./docs/images/setsup_use-this-template.png)
 2. Give your new repository any name you like (for example `<your-name>-gh-actions-workshop`)
 3. Decide for an owner of the new repository (when in doubt, use your private GitHub account)
-4. Make it a `Public` repository so you don't use up any of your private action minutes
+4. Make it a `Public` repository so you don't use up any of your private action minutes.  If you have a paid plan, you can also make it internal or private.
 5. Click `Create repository from template`
 
 ![Image of Repository Creation Screen with settings as explained above](docs/images/setup_create-repo.png)
