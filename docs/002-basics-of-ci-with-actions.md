@@ -235,7 +235,7 @@ jobs:
 6. Wait for the CI workflow to run, and you will see a new comment in your pull request with the code coverage.
 ![PR Comment with a coverage report from vitest](./images/vitest-coverage-report.png)
 
-### 3.6. (Optional) - Enforce a certain coverage threshold with Branch Protection rules
+### 3.6. (Optional) - Enforce a certain coverage threshold with Repository Rulesets
 
 As you can see, the test coverage of this project is quite low. Sometimes, we want to enforce a certain level of coverage on a project. This means that we would not allow merging a PR if it reduces the coverage below a certain threshold.
 
@@ -267,26 +267,30 @@ The `coverage` step should now fail. However, this does not yet prevent you from
 
 ![GitHub checks with a failed action-workflow, but the merge button is still active](./images/merge-possible-with-failed-checks.png)
 
-To make this work, we need to set our target branch `main` as a protected branch and enforce that the `build` workflow be successful before a merge can be executed:
+To make this work, we need to set our target branch `main` as a protected branch and enforce that the `build` workflow be successful before a merge can be executed. In the past this was done with branch protection rules, but now it is recommended to use repository rulesets as they allow to manage policy at an organization or enterprise level rather than per repository. However, for the sake of simplicity we will use repo rulesets at the repository level in this workshop.
 
-1. Within your repository, go to **Settings** and then to **Branches**.
+1. Within your repository, go to **Settings**, expand the **Rules** dropdown, and then go to **Rulesets**.
 
-2. Under **Branch protection rules**, click on **Add branch protection rule**.
+2. Click the **New ruleset** dropdown and click on **New Branch Ruleset**.
 
-3. For the **Branch name pattern**, type `main`.
+3. Enter a name for the ruleset, e.g. `Protect main branch`, and click **Next**.
 
-4. Check the **Require status checks to pass before merging** box.
+4. Change **Enforcement Status** to **Active**.
 
-5. In the search box that will appear, look for `Build and Test` (or whatever name you chose for the job in step 3.3) and select that job. *(Note that you might also see the jobs of the previous matrix builds with specific Node versions. You can ignore these.)*
-    ![Settings page with set up branch protection rule for main branch](./images/setting-up-branch-protection-rules.png)
+5. For **Target Branches**, click **Add target** and select **Include default branch**. 
 
-6. Scroll down and click `Create`.
+6. For the **Branch rules**, there are several that are useful for a typical CI workflow. For now, select **Require status checks to pass before merging**.
+
+7. Click on the **Add checks** button. In the search box that will appear, look for `Build and Test` (or whatever name you chose for the job in step 3.3) and wait for a second or two and it should find that job.  Select the job. *(Note that you might also see the jobs of the previous matrix builds with specific Node versions. You can ignore these.)*
+    ![Settings page with repo ruleset for main branch](./images/setting-up-repo-rulesets.png)
+
+7. Scroll down and click `Create`.
 
 If you now return to the PR, you will see that the merge button is inactive and can't be clicked anymore.
 
 ![GitHub checks with a failed action-workflow and merge button is inactive](./images/merge-prevented-with-failed-checks.png)
 
-As an administrator, you still have the option to force a merge. Regular users in your repo won't have this privilege.
+As an administrator, you will have the option to force a merge. Regular users won't have this privilege.
 
 > **Note**
 > This will now prevent people from merging a branch to `main` not only if the coverage thresholds are not met, but also if the entire workflow fails for other reasons. For example, if the build isn't working anymore or if the tests are generally failing - which usually is a desired outcome.
@@ -295,6 +299,10 @@ From here, you have two options:
 
 1. Write more tests (if you're into React 😉)
 2. Remove the (admittedly stringent) thresholds or lower them to make the workflow pass
+
+## Cleanup 
+
+Once you are done with this part of the workshop, go back into your branch protection rule and remove it or set the **Enforcement Status** to **Disabled**. This will ensure it does not interfere with the next parts of the workshop.
 
 ## Conclusion
 
