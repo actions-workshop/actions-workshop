@@ -30,7 +30,7 @@ const Login: FunctionComponent = (): ReactElement => {
     setError(undefined);
     await login({ userName: username, password })
       .then((): void => {
-        navigate("/");
+        navigate("/", { replace: true });
       })
       .catch((err: Error): void => {
         setError(mapErrorMessage(err));

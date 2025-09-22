@@ -22,7 +22,7 @@ function App() {
       : createFetchOctocatApi(API_URL);
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <OctocatApiProvider octocatApi={octocatApi}>
         <QueryClientProvider client={queryClient}>
           <UserContextProvider>

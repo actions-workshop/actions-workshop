@@ -163,17 +163,17 @@ Open the `node.js.yml` file. Right after the `package-and-publish` job, insert t
       url: "https://${{ steps.deploy.outputs.fqdn }}"
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v5
 
       - name: Log into Azure using OIDC
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZ_CLIENT_ID }}
           tenant-id: ${{ secrets.AZ_TENANT_ID }}
           subscription-id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
 
       - name: Deploy resources
-        uses: azure/arm-deploy@v1
+        uses: azure/arm-deploy@v2
         id: deploy
         with:
           scope: subscription
@@ -218,11 +218,11 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v5
     - name: Use Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
-        node-version: 16.x
+        node-version: 22.x
         cache: 'npm'
     - run: npm ci
     - run: npm run build --if-present
@@ -246,10 +246,10 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Sign in to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
@@ -257,7 +257,7 @@ jobs:
 
       - name: Generate docker metadata
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
@@ -265,7 +265,7 @@ jobs:
             type=ref,event=pr
             type=sha,event=branch,prefix=,suffix=,format=short
       - name: Build and Push Docker Image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v6
         with:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
@@ -285,17 +285,17 @@ jobs:
       url: "https://${{ steps.deploy.outputs.fqdn }}"
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v5
 
       - name: Log into Azure using OIDC
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZ_CLIENT_ID }}
           tenant-id: ${{ secrets.AZ_TENANT_ID }}
           subscription-id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
 
       - name: Deploy resources
-        uses: azure/arm-deploy@v1
+        uses: azure/arm-deploy@v2
         id: deploy
         with:
           scope: subscription

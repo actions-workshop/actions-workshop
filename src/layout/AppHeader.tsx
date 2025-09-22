@@ -22,6 +22,11 @@ const GHStyledLink = styled(Link)`
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
+  background: none;
+  border: none;
+  font-size: inherit;
+  font-family: inherit;
+  padding: 0;
 
   &:hover {
     color: rgba(255, 255, 255, 0.7);
@@ -41,7 +46,7 @@ const AppHeader: FunctionComponent = (): ReactElement => {
       </Header.Item>
       <Header.Item>
         {isLoggedIn ? (
-          <Button onClick={() => logout()}>Sign out</Button>
+          <GHStyledLink as="button" onClick={() => logout()}>Sign out</GHStyledLink>
         ) : (
           <GHStyledLink to="/login">Sign in</GHStyledLink>
         )}
