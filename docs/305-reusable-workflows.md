@@ -72,7 +72,7 @@ jobs:
   do-build-test:
     uses: ./.github/workflows/reusable-build-and-test.yml
     with:
-      node_version: '18'
+      node_version: '24'
       run_tests: true
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
