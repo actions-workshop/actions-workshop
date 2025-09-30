@@ -100,7 +100,7 @@ jobs:
   build-matrix:
     uses: my-org/shared-workflows/.github/workflows/matrix-build.yml@v1.2.3
     with:
-      node_versions: ['16', '18']
+      node_versions: ['22', '24']
       os: ['ubuntu-latest', 'windows-latest']
     secrets:
       GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
