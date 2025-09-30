@@ -76,7 +76,7 @@ You will find many actions related to Docker. For this lab, you will use the fol
         steps:
         - uses: actions/checkout@v5
         - name: Use Node.js 22.x
-          uses: actions/setup-node@v4
+          uses: actions/setup-node@v5
           with:
             node-version: 22.x
             cache: npm
