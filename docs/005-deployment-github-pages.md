@@ -1,17 +1,8 @@
 # Part 5 - Deployment: GitHub Pages
 
-In a previous lab, you used GitHub Actions to package an application into a Docker image and publish that package to the GitHub Container registry. The next step in a classic continuous delivery process is to **deploy** the application.
+In a previous lab, you used GitHub Actions to package an application into a Docker image and publish that package to the GitHub Container registry. The next step in a classic continuous delivery process is to **deploy** the application.  [GitHub Pages](https://docs.github.com/en/pages) does NOT have the ability to deploy or work with Docker containers.  However, it can take a static website and publish it.  
 
-In this lab, you will configure [GitHub Pages](https://docs.github.com/en/pages) to accept deployments from GitHub Actions.  GitHu## 7 — Troubleshooting
-| Symptom | Likely Cause | Fix |
-|---|---|---|
-| `pages` deploy step fails with permission error | Missing `pages: write` | Add `permissions.pages: write` at workflow or job level |
-| Error about OIDC / `id-token` | Missing `id-token: write` | Add `permissions.id-token: write` (required by Pages deploy) |
-| "No files were found with the provided path" | Wrong `path` in upload step | Point `path:` to your site's build output (e.g., `dist`, `build`, `_site`) |
-| **Site loads but shows blank page with 404 errors for assets** | **Missing --base option in build command** | **Add `-- --base=/${{ github.event.repository.name }}/` to build command** |
-| Assets load but have wrong URLs in dev tools | Incorrect base path in workflow | Verify `--base` uses correct repository name format |
-| Site works locally but not on Pages | Missing base configuration for Pages | Ensure build command includes `--base` option |
-| `act` local runner fails on deploy step | No OIDC available locally | Guard with `if: ${{ !env.ACT }}` or skip deploy locally |is GitHub's built-in static site hosting service that allows you to host static websites directly from your GitHub repository.  This is provided as an alternative to the Azure deployment lab in case an Azure account is not available.  While it can't host Docker images directly, you’ll configure GitHub Pages, build your app as a static site, and deploy it using GitHub Actions.
+In this lab, you will configure [GitHub Pages](https://docs.github.com/en/pages) to accept deployments from GitHub Actions.  GitHub Pages is GitHub's built-in static site hosting service that allows you to host static websites directly from your GitHub repository.  This is provided as an alternative to the Azure deployment lab in case an Azure account is not available.  While it can't host Docker images directly, you’ll configure GitHub Pages, build your app as a static site, and deploy it using GitHub Actions.
 
 ## 1 - Configure GitHub Pages for deployment
 
