@@ -72,7 +72,7 @@ Let's dissect the reference to that action to understand its structure:
 
 - `actions/` references the owner of the action, which is translated into a user or organization on GitHub.
 - `setup-node` refers to the name of the action, which corresponds to a repository on GitHub.
-- `@v4` represents the version of the action, which corresponds to a Git tag or a general reference (such as a branch or even a commit SHA) on the repository.
+- `@v5` represents the version of the action, which corresponds to a Git tag or a general reference (such as a branch or even a commit SHA) on the repository.
 
 This reference structure makes it straightforward to navigate to the source code of any action by merely appending the `owner` and `name` to the `github.com` URL, like so: `https://github.com/{owner}/{name}`. For the above example, this would be <https://github.com/actions/setup-node>.
 
