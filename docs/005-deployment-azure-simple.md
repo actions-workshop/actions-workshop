@@ -155,7 +155,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22.x
           cache: "npm"
