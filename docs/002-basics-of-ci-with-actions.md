@@ -78,7 +78,7 @@ This reference structure makes it straightforward to navigate to the source code
 
 ### 2.3 - Understanding matrix builds
 
-Observe that our workflow employs a [matrix build strategy](https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs) with three Node.js versions: 18, 20, and 22. A matrix build enables you to execute a job in parallel using various input parameters. In our case, we're running the same job twice, but with distinct Node.js versions.
+Observe that our workflow employs a [matrix build strategy](https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs) with two Node.js versions: 22 and 24. A matrix build enables you to execute a job in parallel using various input parameters. In our case, we're running the same job twice, but with distinct Node.js versions.
 
 ### Checking workflow runs
 
