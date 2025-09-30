@@ -181,7 +181,7 @@ jobs:
   do-build-test:
     uses: ./.github/workflows/reusable-build-and-test-2.yml
     with:
-      node_version: '18'
+      node_version: '24'
       custom_message: 'This is a custom message from the caller workflow!'
     secrets: inherit
     # Alternatively, pass secrets one by one:
