@@ -152,7 +152,7 @@ outputs:
     description: The time we greeted you
 
 runs:
-  using: node20
+  using: node24
   main: dist/index.js
 ```
 
