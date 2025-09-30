@@ -96,19 +96,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-and-install
         with:
-          node-version: '20'
+          node-version: '24'
       - run: npm test
 
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-and-install
         with:
-          node-version: '20'
+          node-version: '24'
       - run: npm run lint
 ```
 
