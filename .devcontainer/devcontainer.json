@@ -16,22 +16,55 @@
       "onAutoForward": "notify"
     }
   },
-  "extensions": [
-    "antfu.vite",
-    "github.github-vscode-theme",
-    "coenraads.bracket-pair-colorizer",
-    "dbaeumer.vscode-eslint",
-    "ms-azuretools.vscode-bicep"
-  ],
-  "settings": {
-    "terminal.integrated.profiles.linux": {
-      "bash": {
-        "path": "bash",
-        "icon": "terminal-bash"
-      }
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": false,
+      "installOhMyZsh": false,
+      "upgradePackages": true,
+      "nonFreePackages": false
     },
-    "telemetry.enableTelemetry": false,
-    "extensions.ignoreRecommendations": true,
+    "ghcr.io/devcontainers/features/github-cli": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "version": "latest",
+      "moby": true,
+      "dockerDashComposeVersion": "v2",
+      "installDockerBuildx": false
+    },
+    "ghcr.io/devcontainers/features/terraform:1": {
+      "version": "1.13.1",
+      "tflint": "0.59.1",
+      "terragrunt": "0.86.2"
+    },
+    "ghcr.io/devcontainers/features/azure-cli:1": {
+      "version": "2.77.0",
+      "extensions": "",
+      "installBicep": true
+    }
   },
-  "postCreateCommand": "curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash && npm ci"
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "github.github-vscode-theme",
+        "coenraads.bracket-pair-colorizer",
+        "dbaeumer.vscode-eslint",
+        "ms-azuretools.vscode-bicep",
+        "GitHub.copilot",
+        "GitHub.copilot-chat"
+      ],
+      "settings": {
+        "terminal.integrated.profiles.linux": {
+          "bash": {
+            "path": "bash",
+            "icon": "terminal-bash"
+          }
+        },
+        "telemetry.enableTelemetry": false,
+        "extensions.ignoreRecommendations": true
+      }
+    }
+  },
+  "onCreateCommand": "npm install -g vite@7.1.4",
+  "postCreateCommand": "npm ci"
 }

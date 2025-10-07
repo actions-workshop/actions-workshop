@@ -3,12 +3,18 @@ import { Login } from "./Login";
 import { renderWithProviders } from "../../test/renderWithProviders";
 import { screen, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, expect, describe, it } from "vitest";
+import { afterEach, beforeEach, expect, describe, it } from "vitest";
 import { Route, Routes } from "react-router-dom";
 import { OctocatApi } from "../api/OctocatApi";
 import { ServerUnavailableError } from "../api/errors/ServerUnavailableError";
 
 describe("<Login />", (): void => {
+  let user: ReturnType<typeof userEvent.setup>;
+
+  beforeEach((): void => {
+    user = userEvent.setup();
+  });
+
   afterEach((): void => {
     cleanup();
   });
@@ -41,9 +47,9 @@ describe("<Login />", (): void => {
       initialRoute: "/login",
     });
 
-    await userEvent.type(screen.getByLabelText("Username"), "testUser");
-    await userEvent.type(screen.getByLabelText("Password"), "testPassword");
-    await userEvent.click(screen.getByText("Sign in"));
+    await user.type(screen.getByLabelText("Username"), "testUser");
+    await user.type(screen.getByLabelText("Password"), "testPassword");
+    await user.click(screen.getByText("Sign in"));
 
     expect(await screen.findByTestId("homepage")).toBeDefined();
   });
@@ -57,12 +63,12 @@ describe("<Login />", (): void => {
 
     renderWithProviders({ component: <Login />, inMemoryApi });
 
-    await userEvent.type(screen.getByLabelText("Username"), "testuser");
-    await userEvent.type(screen.getByLabelText("Password"), "wrongpassword");
-    userEvent.click(screen.getByText("Sign in"));
+    await user.type(screen.getByLabelText("Username"), "testuser");
+    await user.type(screen.getByLabelText("Password"), "wrongpassword");
+    await user.click(screen.getByText("Sign in"));
 
     expect(
-      await screen.findByText("Invalid username or password.")
+      await screen.findByText("Invalid username or password."),
     ).toBeDefined();
   });
 
@@ -76,14 +82,14 @@ describe("<Login />", (): void => {
 
     renderWithProviders({ component: <Login />, inMemoryApi });
 
-    userEvent.type(screen.getByLabelText("Username"), "testuser");
-    userEvent.type(screen.getByLabelText("Password"), "wrongpassword");
-    userEvent.click(screen.getByText("Sign in"));
+    await user.type(screen.getByLabelText("Username"), "testuser");
+    await user.type(screen.getByLabelText("Password"), "wrongpassword");
+    await user.click(screen.getByText("Sign in"));
 
     expect(
       await screen.findByText(
-        "Authentication server not available. Please try again later."
-      )
+        "Authentication server not available. Please try again later.",
+      ),
     ).toBeDefined();
   });
 
@@ -97,14 +103,14 @@ describe("<Login />", (): void => {
 
     renderWithProviders({ component: <Login />, inMemoryApi });
 
-    userEvent.type(screen.getByLabelText("Username"), "testuser");
-    userEvent.type(screen.getByLabelText("Password"), "wrongpassword");
-    userEvent.click(screen.getByText("Sign in"));
+    await user.type(screen.getByLabelText("Username"), "testuser");
+    await user.type(screen.getByLabelText("Password"), "wrongpassword");
+    await user.click(screen.getByText("Sign in"));
 
     expect(
       await screen.findByText(
-        "Unexpected Error. Please contact the administrator."
-      )
+        "Unexpected Error. Please contact the administrator.",
+      ),
     ).toBeDefined();
   });
 });

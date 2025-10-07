@@ -7,7 +7,7 @@ import { User } from "./types/User";
 const checkErrors = (response: Response) => {
   if (!response.ok) {
     throw new Error(
-      `Call to "${response.url}" returned "${response.status} - ${response.statusText}"`
+      `Call to "${response.url}" returned "${response.status} - ${response.statusText}"`,
     );
   }
   return response;
@@ -77,7 +77,7 @@ const createFetchOctocatApi = (endpoint: string): OctocatApi => {
         .then((response) => {
           if (!response.ok) {
             console.error(
-              `Received Error from Backend with status ${response.status} and body ${response.statusText}`
+              `Received Error from Backend with status ${response.status} and body ${response.statusText}`,
             );
             if (response.status >= 500) {
               throw new ServerUnavailableError("Server Unavailable.");

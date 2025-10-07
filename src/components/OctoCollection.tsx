@@ -21,7 +21,7 @@ const OctoCollection: FunctionComponent<OctoCollectionProps> = ({
   ));
 
   return (
-    <Box display="flex" flex={"flex"} flexWrap={"wrap"}>
+    <Box display="flex" flexWrap={"wrap"}>
       {items}
     </Box>
   );

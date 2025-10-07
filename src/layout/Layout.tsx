@@ -13,7 +13,7 @@ const Layout: FunctionComponent<PropsWithChildren> = ({
     <PageLayout rowGap="none">
       <PageLayout.Header
         sx={{
-          backgroundColor: "white",
+          backgroundColor: "#24292f",
         }}
       >
         <AppHeader />

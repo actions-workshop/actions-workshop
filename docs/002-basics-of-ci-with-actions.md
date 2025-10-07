@@ -26,7 +26,6 @@ To build a workflow that employs Actions for your Continuous Integration process
 2. Select **New workflow**.
 3. Search for `Node.js`.
 4. Click **Configure** under the `Node.js` starter workflow.
-5. In the `node-version` field within the YAML configuration, remove `14.x` (since our app isn't compatible with this version).
 
 To finish setting up your initial CI workflow, commit the `node.js.yml` file to the `main` branch.
 
@@ -48,13 +47,13 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x, 18.x]
+        node-version: [22.x, 24.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
@@ -73,13 +72,13 @@ Let's dissect the reference to that action to understand its structure:
 
 - `actions/` references the owner of the action, which is translated into a user or organization on GitHub.
 - `setup-node` refers to the name of the action, which corresponds to a repository on GitHub.
-- `@v3` represents the version of the action, which corresponds to a Git tag or a general reference (such as a branch or even a commit SHA) on the repository.
+- `@v5` represents the version of the action, which corresponds to a Git tag or a general reference (such as a branch or even a commit SHA) on the repository.
 
 This reference structure makes it straightforward to navigate to the source code of any action by merely appending the `owner` and `name` to the `github.com` URL, like so: `https://github.com/{owner}/{name}`. For the above example, this would be <https://github.com/actions/setup-node>.
 
 ### 2.3 - Understanding matrix builds
 
-Observe that our workflow employs a [matrix build strategy](https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs) with two Node.js versions: 16 and 18. A matrix build enables you to execute a job in parallel using various input parameters. In our case, we're running the same job twice, but with distinct Node.js versions.
+Observe that our workflow employs a [matrix build strategy](https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs) with two Node.js versions: 22 and 24. A matrix build enables you to execute a job in parallel using various input parameters. In our case, we're running the same job twice, but with distinct Node.js versions.
 
 ### Checking workflow runs
 
@@ -173,7 +172,7 @@ For now, what you need to know is: as soon as you specify the `permissions` keyw
     ```yml
         # ... rest of the node.js.yml
         - run: npm run test
-        - uses: davelosert/vitest-coverage-report-action@v1
+        - uses: davelosert/vitest-coverage-report-action@v2
           with:
             vite-config-path: vite.config.ts
     ```
@@ -195,7 +194,7 @@ For now, what you need to know is: as soon as you specify the `permissions` keyw
 As this is a frontend project, we don't need a matrix build strategy (which is more suited for backend projects that might be running on several Node.js versions). Removing the matrix build will also make the tests run only once.
 
 <details>
-<summary>Try to remove the matrix build yourself and make the `actions/setup-node` action only run on version 16.x. Expand this section to see the solution.</summary>
+<summary>Try to remove the matrix build yourself and make the `actions/setup-node` action only run on version 22.x. Expand this section to see the solution.</summary>
 
 ```yml
 jobs:
@@ -206,11 +205,11 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
       - name: Use Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v5
         with:
-          node-version: 16.x
+          node-version: 22.x
           cache: 'npm'
       - run: npm ci
       - run: npm run build
@@ -236,7 +235,7 @@ jobs:
 6. Wait for the CI workflow to run, and you will see a new comment in your pull request with the code coverage.
 ![PR Comment with a coverage report from vitest](./images/vitest-coverage-report.png)
 
-### 3.6. (Optional) - Enforce a certain coverage threshold with Branch Protection rules
+### 3.6. (Optional) - Enforce a certain coverage threshold with Repository Rulesets
 
 As you can see, the test coverage of this project is quite low. Sometimes, we want to enforce a certain level of coverage on a project. This means that we would not allow merging a PR if it reduces the coverage below a certain threshold.
 
@@ -268,26 +267,30 @@ The `coverage` step should now fail. However, this does not yet prevent you from
 
 ![GitHub checks with a failed action-workflow, but the merge button is still active](./images/merge-possible-with-failed-checks.png)
 
-To make this work, we need to set our target branch `main` as a protected branch and enforce that the `build` workflow be successful before a merge can be executed:
+To make this work, we need to set our target branch `main` as a protected branch and enforce that the `build` workflow be successful before a merge can be executed. In the past this was done with branch protection rules, but now it is recommended to use repository rulesets as they allow to manage policy at an organization or enterprise level rather than per repository. However, for the sake of simplicity we will use repo rulesets at the repository level in this workshop.
 
-1. Within your repository, go to **Settings** and then to **Branches**.
+1. Within your repository, go to **Settings**, expand the **Rules** dropdown, and then go to **Rulesets**.
 
-2. Under **Branch protection rules**, click on **Add branch protection rule**.
+2. Click the **New ruleset** dropdown and click on **New Branch Ruleset**.
 
-3. For the **Branch name pattern**, type `main`.
+3. Enter a name for the ruleset, e.g. `Protect main branch`, and click **Next**.
 
-4. Check the **Require status checks to pass before merging** box.
+4. Change **Enforcement Status** to **Active**.
 
-5. In the search box that will appear, look for `Build and Test` (or whatever name you chose for the job in step 3.3) and select that job. *(Note that you might also see the jobs of the previous matrix builds with specific Node versions. You can ignore these.)*
-    ![Settings page with set up branch protection rule for main branch](./images/setting-up-branch-protection-rules.png)
+5. For **Target Branches**, click **Add target** and select **Include default branch**. 
 
-6. Scroll down and click `Create`.
+6. For the **Branch rules**, there are several that are useful for a typical CI workflow. For now, select **Require status checks to pass before merging**.
+
+7. Click on the **Add checks** button. In the search box that will appear, look for `Build and Test` (or whatever name you chose for the job in step 3.3) and wait for a second or two and it should find that job.  Select the job. *(Note that you might also see the jobs of the previous matrix builds with specific Node versions. You can ignore these.)*
+    ![Settings page with repo ruleset for main branch](./images/setting-up-repo-rulesets.png)
+
+7. Scroll down and click `Create`.
 
 If you now return to the PR, you will see that the merge button is inactive and can't be clicked anymore.
 
 ![GitHub checks with a failed action-workflow and merge button is inactive](./images/merge-prevented-with-failed-checks.png)
 
-As an administrator, you still have the option to force a merge. Regular users in your repo won't have this privilege.
+As an administrator, you will have the option to force a merge. Regular users won't have this privilege.
 
 > **Note**
 > This will now prevent people from merging a branch to `main` not only if the coverage thresholds are not met, but also if the entire workflow fails for other reasons. For example, if the build isn't working anymore or if the tests are generally failing - which usually is a desired outcome.
@@ -296,6 +299,10 @@ From here, you have two options:
 
 1. Write more tests (if you're into React 😉)
 2. Remove the (admittedly stringent) thresholds or lower them to make the workflow pass
+
+## Cleanup 
+
+Once you are done with this part of the workshop, go back into your branch protection rule and remove it or set the **Enforcement Status** to **Disabled**. This will ensure it does not interfere with the next parts of the workshop.
 
 ## Conclusion
 

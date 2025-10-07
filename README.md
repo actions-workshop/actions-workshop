@@ -25,7 +25,7 @@ Anything you need for this workshop is contained within this template-repository
     ![Image of the green button saying Use this Repo](./docs/images/setsup_use-this-template.png)
 2. Give your new repository any name you like (for example `<your-name>-gh-actions-workshop`)
 3. Decide for an owner of the new repository (when in doubt, use your private GitHub account)
-4. Make it a `Public` repository so you don't use up any of your private action minutes
+4. Make it a `Public` repository so you don't use up any of your private action minutes.  If you have a paid plan such as GitHub Enterprise, you can also make it internal or private.
 5. Click `Create repository from template`
 
 ![Image of Repository Creation Screen with settings as explained above](docs/images/setup_create-repo.png)
@@ -41,6 +41,17 @@ These are the self-serve documents you can follow to complete this workshop. If 
 3. **[Package and release your Application](./docs/003-packaging.md)**
 4. **[Security with Actions](./docs/004-security.md)**
 5. **[Lift-off - Deployment with Actions](./docs/005-deployment.md)**
+
+### Advanced Topics (Optional)
+
+There are a number of advanced topics you can explore once you have completed the main workshop:
+
+- **[Advanced Workflow Syntax](./docs/301-advanced-workflow-syntax.md)**
+- **[Triggers and Events](./docs/302-triggers-and-events.md)**
+- **[Workflow Feedback and Reporting](./docs/303-workflow-feedback-and-reporting.md)**
+- **[Governance](./docs/304-governance.md)**
+- **[Reusable Workflows](./docs/305-reusable-workflows.md)**
+- **[Authoring Actions](./docs/306-authoring-actions.md)**
 
 ## Rocketdex  Application Setup
 

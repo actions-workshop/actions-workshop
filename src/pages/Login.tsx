@@ -30,7 +30,7 @@ const Login: FunctionComponent = (): ReactElement => {
     setError(undefined);
     await login({ userName: username, password })
       .then((): void => {
-        navigate("/");
+        navigate("/", { replace: true });
       })
       .catch((err: Error): void => {
         setError(mapErrorMessage(err));
@@ -38,25 +38,45 @@ const Login: FunctionComponent = (): ReactElement => {
   };
 
   return (
-    <Box display="grid" gridGap={3} width={300} m="auto">
+    <Box display="grid" sx={{ gap: 3 }} width={300} m="auto">
       <form onSubmit={handleSubmit}>
         <FormControl>
           <FormControl.Label>Username</FormControl.Label>
           <TextInput
             value={username}
             onChange={(event) => setUsername(event.target.value)}
+            sx={{
+              border: "1px solid",
+              borderColor: "border.default",
+              "&:focus": {
+                borderColor: "accent.emphasis",
+              },
+            }}
           />
         </FormControl>
-        <FormControl>
+        <FormControl sx={{ mt: 3 }}>
           <FormControl.Label>Password</FormControl.Label>
           <TextInput
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
+            sx={{
+              border: "1px solid",
+              borderColor: "border.default",
+              "&:focus": {
+                borderColor: "accent.emphasis",
+              },
+            }}
           />
         </FormControl>
-        <Button>Sign in</Button>
-        {error && <Flash variant="danger">{error}</Flash>}
+        <Box sx={{ mt: 3 }}>
+          <Button type="submit">Sign in</Button>
+        </Box>
+        {error && (
+          <Flash variant="danger" sx={{ mt: 3 }}>
+            {error}
+          </Flash>
+        )}
       </form>
     </Box>
   );

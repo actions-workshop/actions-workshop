@@ -1,4 +1,4 @@
-import { Button, Header, StyledOcticon } from "@primer/react";
+import { Button, Header } from "@primer/react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { FunctionComponent, ReactElement } from "react";
@@ -22,6 +22,11 @@ const GHStyledLink = styled(Link)`
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
+  background: none;
+  border: none;
+  font-size: inherit;
+  font-family: inherit;
+  padding: 0;
 
   &:hover {
     color: rgba(255, 255, 255, 0.7);
@@ -34,12 +39,14 @@ const AppHeader: FunctionComponent = (): ReactElement => {
   return (
     <Header>
       <Header.Item full>
-        <StyledOcticon icon={MarkGithubIcon} size={32} sx={{ mr: 2 }} />
-        <GHStyledLink to="/">RocketDex</GHStyledLink>
+        <MarkGithubIcon size={32} fill="#ffffff" />
+        <GHStyledLink to="/" style={{ marginLeft: "8px" }}>
+          RocketDex
+        </GHStyledLink>
       </Header.Item>
       <Header.Item>
         {isLoggedIn ? (
-          <Button onClick={() => logout()}>Sign out</Button>
+          <GHStyledLink as="button" onClick={() => logout()}>Sign out</GHStyledLink>
         ) : (
           <GHStyledLink to="/login">Sign in</GHStyledLink>
         )}

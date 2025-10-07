@@ -8,7 +8,7 @@ import { createFetchOctocatApi } from "./api/FetchOctocatApi";
 import { OctocatApiProvider } from "./api/OctocatApiProvider";
 import { UserContextProvider } from "./auth/UserContextProvider";
 import { MockOctocats } from "./api/types/MockOctocats";
-import { QueryClient, QueryClientProvider } from "react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const MODE = import.meta.env.MODE;
 const API_URL = import.meta.env.API_URL ?? "https://octocatapi.com";
@@ -22,7 +22,7 @@ function App() {
       : createFetchOctocatApi(API_URL);
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <OctocatApiProvider octocatApi={octocatApi}>
         <QueryClientProvider client={queryClient}>
           <UserContextProvider>
